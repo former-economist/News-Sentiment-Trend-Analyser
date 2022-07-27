@@ -8,7 +8,7 @@
 			"isBackground": true,
 			"dependsOn": "pip install (functions)",
 			"options": {
-				"cwd": "${workspaceFolder}/Data_24"
+				"cwd": "${workspaceFolder}/Logger"
 			}
 		},
 		{

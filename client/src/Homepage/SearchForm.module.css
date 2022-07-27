@@ -1,7 +1,27 @@
 .form {
+    display: block;
     margin: auto;
+    width: 75%;
+    /* background-color: red; */
+    padding: 1.125rem;
+
 }
 
 .input {
-    margin: auto;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border: none;
+    background-color: rgb(222, 222, 222);
+    color: rgb(40, 40, 40);
 }
+
+
+.button{
+    margin: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgb(40, 40, 40);
+    color: rgb(232, 231, 231);
+    border: none;
+}
+
+

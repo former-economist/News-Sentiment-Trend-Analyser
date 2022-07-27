@@ -91,8 +91,3 @@ class QueryResult(Base):
             "sentiment": self.sentiment
         }
         return dic
-
-
-class SentimentByDate(Base):
-    __tablename__ = 'dailysentiment'
-    id = Column(Integer, primary_key=True)

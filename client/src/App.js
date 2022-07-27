@@ -1,13 +1,11 @@
-
-
-import { Redirect, Route, Switch } from 'react-router-dom';
-import Homepage from './Homepage/Homepage';
-import Results from './ResultPage/Results';
-import styles from './App.module.css'
+import { Redirect, Route, Switch } from "react-router-dom";
+import Homepage from "./Homepage/Homepage";
+import Results from "./ResultPage/Results";
+import styles from "./App.module.css";
 
 function App() {
   return (
-    <div className={styles.div}>
+    <div className={styles}>
       <Switch>
         <Route path="/" exact>
           <Redirect to="/homepage" />
@@ -15,11 +13,7 @@ function App() {
         <Route path="/homepage">
           <Homepage />
         </Route>
-        <Route path="/result">
-          <Results />
-        </Route>
       </Switch>
-      
     </div>
   );
 }

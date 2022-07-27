@@ -98,8 +98,3 @@ class QueryResult(database.Model):
             "sentiment": self.sentiment
         }
         return dic
-
-
-class SentimentByDate(database.Model):
-    __tablename__ = 'dailysentiment'
-    id = database.Column(database.Integer, primary_key=True)

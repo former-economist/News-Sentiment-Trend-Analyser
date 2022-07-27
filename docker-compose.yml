@@ -57,7 +57,7 @@ services:
             - ./client:/client
         depends_on:
             - webservice
-    data_collector:
+    collector:
         container_name: collector
         build: ./Logger
         depends_on:
@@ -72,3 +72,4 @@ services:
             DB_USER: "${DB_USER}"
             DB_PASSWORD: "${DB_PASSWORD}"
             DB_SERVER: db
+            Azure__StorageConnectionString: "${WEB_STORAGE}"
