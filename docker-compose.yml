@@ -1,0 +1,74 @@
+version: "3.9"
+services:
+    db:
+        container_name: "with_maria_db"
+        image: "mariadb:latest"
+        ports:
+            - "3306:3306"
+        restart: "always"
+        environment: 
+            MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+        volumes:
+            - ./data:/docker-entrypoint-initdb.d
+    # rabbitmq:
+    #     container_name: indirect_rabbitmq
+    #     image: rabbitmq:latest
+    #     hostname: "rabbit1"
+    #     environment:
+    #         RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+    #         RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD}"
+    #         RABBTIMQ_SERVER: "${RABBITMQ_SERVER}"
+    #     ports:
+    #         - 5672:5672
+    #         - 15672:15672
+    #     restart: 'always'
+    azurite:
+        container_name: "azurite"
+        image: mcr.microsoft.com/azure-storage/azurite
+        hostname: azurite
+        restart: always
+        command: "azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002"
+        ports:
+            - "10000:10000"
+            - "10001:10001"
+            - "10002:10002"
+    webservice:
+        container_name: webservice
+        build: ./Web_service
+        ports:
+            - "5000:5000"
+        depends_on:
+            - db
+        links:
+            - db
+        restart: 'always'
+        environment:
+            SVC_HOST: 0.0.0.0
+            DB_NAME: "${DB_NAME}"
+            DB_USER: "${DB_USER}"
+            DB_PASSWORD: "${DB_PASSWORD}"
+            DB_SERVER: db
+    client:
+        container_name: "client"
+        build: ./client
+        ports: 
+            - 3000:3000
+        volumes:
+            - ./client:/client
+        depends_on:
+            - webservice
+    data_collector:
+        container_name: collector
+        build: ./Logger
+        depends_on:
+            - azurite
+            - db
+        links:
+            - db
+        restart: "always"
+        environment:
+            SVC_HOST: 0.0.0.0
+            DB_NAME: "${DB_NAME}"
+            DB_USER: "${DB_USER}"
+            DB_PASSWORD: "${DB_PASSWORD}"
+            DB_SERVER: db
