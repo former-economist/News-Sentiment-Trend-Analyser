@@ -1,11 +1,14 @@
 div {
     width: 100vw;
 }
-html{
+html, body{
+    overflow-x: hidden;
     font-family: Helvetica, sans-serif;
 }
 body{
+    position: relative;
     margin: auto;
+    box-sizing: border-box;
 }
 
 

@@ -1,4 +1,5 @@
 import SearchItem from "./SearchItem";
+import styles from "./SearchList.module.css";
 
 const SearchList = (props) => {
   // async function fetchSentiment(id=query.query_id){
@@ -21,32 +22,42 @@ const SearchList = (props) => {
       const query_id = id;
       fetch(`/search/${query_id}`, {
         method: "GET",
-      }).then((res) => {
-        return res.json()
-      }).then((data) => {
-        const items = data
-        console.log(items);
-        props.setNewResult(items)
-      });
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          const items = data;
+          props.setNewResult(items);
+        });
     }, 30000);
-      if(props.newResult.result !== 0){
-          clearInterval(interval)
-          console.log('STOPPED')
-        };
+    if ((props.newResult.result).length > 1) {
+      clearInterval(interval);
+      console.log("STOPPED");
+    }
   }
 
   console.log(props.queries);
   return (
-    <u>
+    <u className={styles.searchlist}>
       {props.queries.map((query) => (
         <SearchItem
           key={query.query_id}
           topic={query.topic}
           sentiment={query.sentiment}
-          checkSentiment={fetchResult(query.query_id)}
+          id={query.query_id}
+          findResults={fetchResult}
         />
       ))}
     </u>
+    // <>
+    //   <SearchItem
+    //     key={props.queries.query_id}
+    //     topic={props.queries.topic}
+    //     sentiment={props.queries.sentiment}
+    //     checkSentiment={fetchResult(props.queries.query_id)}
+    //   />
+    // </>
   );
 };
 

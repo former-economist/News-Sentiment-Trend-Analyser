@@ -1,6 +1,6 @@
 import { useState } from "react";
-// import { useHistory } from "react-router-dom";
 import styles from "./SearchForm.module.css";
+
 
 const SearchForm = (props) => {
   const [restrictedWord, setRestrictedWord] = useState([]);
@@ -38,8 +38,6 @@ const SearchForm = (props) => {
     return finalList;
   };
 
-  // const navitgate = useHistory()
-
   const submitHandler = (e) => {
     e.preventDefault();
     const queryData = {
@@ -75,7 +73,7 @@ const SearchForm = (props) => {
               type="text"
               name="blockedWord"
               value={data.blockedWord}
-              placeholder="Enter words to be restricted"
+              placeholder="Restricted term"
               onChange={(e) => restrictedTermHandler(e, i)}
             ></input>
             <input

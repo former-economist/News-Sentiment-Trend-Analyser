@@ -1,9 +1,10 @@
 import SearchResult from "./SearchResult";
+import styles from "./SearchResultList.module.css"
 
 const SearchResultList = (props) => {
   console.log(props.SearchResult);
   return (
-    <u>
+    <ul className={styles.searchlist}>
       {props.SearchResult.result.map((finding) => (
         <SearchResult
           key={finding.id}
@@ -14,7 +15,7 @@ const SearchResultList = (props) => {
           sentiment={finding.sentiment}
         />
       ))}
-    </u>
+    </ul>
   );
 };
 

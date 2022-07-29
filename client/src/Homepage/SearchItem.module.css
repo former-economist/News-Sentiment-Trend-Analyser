@@ -1,0 +1,14 @@
+.searchitem{
+    margin-left: 2rem;
+    padding-left: 1.25rem;
+    width: 50%;
+    color: rgb(40, 40, 40);
+}
+
+.loading{
+    margin-top: 0;
+    margin-left: 3.25rem;
+    width: 75%;
+    color: rgb(40, 40, 40);
+    /* background-color: red; */
+}

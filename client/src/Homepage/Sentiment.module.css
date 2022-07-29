@@ -1,0 +1,27 @@
+.sentiment{
+    margin-top: 0;
+    margin-left: 0;
+    margin-bottom: 1rem;
+    width: 75%;
+    color: rgb(40, 40, 40);
+    /* background-color: red; */
+}
+
+.positiveSentiment{
+    margin-top: 0;
+    margin-left: 3.25rem;
+    margin-bottom: 1rem;
+    width: 75%;
+    height: 0.25rem;
+    color: rgb(40, 40, 40);
+    background-color: #004ADB;
+}
+
+.negativeSentiment{
+    margin-top: 0;
+    margin-left: 3.25rem;
+    margin-bottom: 1rem;
+    width: 75%;
+    color: rgb(40, 40, 40);
+    background-color: #FF4040;
+}

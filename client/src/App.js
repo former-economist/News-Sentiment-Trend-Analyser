@@ -13,6 +13,9 @@ function App() {
         <Route path="/homepage">
           <Homepage />
         </Route>
+        <Route path="/results">
+          <Results/>
+        </Route>
       </Switch>
     </div>
   );
