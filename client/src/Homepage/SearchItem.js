@@ -57,9 +57,10 @@ const SearchItem = (props) => {
   return (
     <>
       <h3 className={styles.searchitem}>{topic}</h3>
+      {searchResults.result === 'None' && <p>Could not find articles relating to search</p>}
       {searchResults.result === 0 && <p className={styles.loading}>Loading</p>}
-      {searchResults.result.length > 1 && <Sentiment newSentiment={searchResults} />}
-      {searchResults.result.length > 1 && (
+      {searchResults.result.length > 1 && searchResults.result !== 'None' && <Sentiment newSentiment={searchResults} />}
+      {searchResults.result.length > 1 && searchResults.result !== 'None' && (
         <SearchResultList SearchResult={searchResults} />
       )}
     </>

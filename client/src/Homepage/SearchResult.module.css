@@ -1,3 +1,58 @@
+.article {
+  margin-top: 0;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+@media (min-width: 40em) {
+  .article {
+    margin-top: 0;
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    max-width: 50rem;
+  }
+}
+
+.negative {
+  color: rgb(40, 40, 40);
+  background-color: #ff4040;
+}
+
+p {
+  margin-left: 2rem;
+  padding-left: 0.5rem;
+}
+p.negativeP {
+  color: rgb(40, 40, 40);
+}
+
+.positive {
+  color: whitesmoke;
+  background-color: #004adb;
+}
+
+p.positiveP {
+  color: whitesmoke;
+}
+
+p.neutralP {
+  color: whitesmoke;
+}
+
+.neutral {
+  color: whitesmoke;
+  background-color: rgb(40, 40, 40);
+}
+
+a {
+  display: block;
+  text-decoration: underline;
+  margin-left: 1.25rem;
+  padding: 1rem;
+}
+
+
 a.Negative {
   color: rgb(40, 40, 40);
 }
@@ -8,29 +63,4 @@ a.Positive {
 
 a.Neutral {
   color: whitesmoke;
-}
-
-.article {
-  margin-top: 0;
-  margin-left: 1.25rem;
-  padding: 1rem;
-  width: 75%;
-}
-
-.negative {
-  text-decoration: none;
-  color: rgb(40, 40, 40);
-  background-color: #ff4040;
-}
-
-.positive {
-  text-decoration: none;
-  color: whitesmoke;
-  background-color: #004adb;
-}
-
-.neutral {
-  text-decoration: none;
-  color: whitesmoke;
-  background-color: rgb(40, 40, 40);
 }

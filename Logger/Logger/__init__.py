@@ -8,7 +8,7 @@ from . import models
 import os
 import dateparser
 import sqlalchemy
-from sqlalchemy import exc
+from sqlalchemy import exc, delete
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import exists
 from .scraper_funcs import create_search_string, create_instance, create_dated_instance, search, analysis_sentiment
@@ -64,55 +64,59 @@ def main(mytimer: func.TimerRequest) -> None:
         todays_news = create_instance()
         search_topic = str(query.topic)
         found_articles = search(search_topic, todays_news)
-        analysis_sentiment(found_articles)
-        for article in found_articles:
-            article_publisher = article['publisher']['title']
-            article_headline = article['title']
-            article_desc = article['description']
-            article_url = article['url']
-            article_date = dateparser.parse(article['published date'])
-            article_sentiment = article['sentiment']
+        if len(found_articles) == 0:
+            session.delete(query)
+            session.commit()
+        else:
+            analysis_sentiment(found_articles)
+            for article in found_articles:
+                article_publisher = article['publisher']['title']
+                article_headline = article['title']
+                article_desc = article['description']
+                article_url = article['url']
+                article_date = dateparser.parse(article['published date'])
+                article_sentiment = article['sentiment']
 
-            does_exist = session.query(models.QueryResult).filter(
-                models.QueryResult.headline == article_headline)
-            is_there = session.query(does_exist.exists()).scalar()
+                does_exist = session.query(models.QueryResult).filter(
+                    models.QueryResult.headline == article_headline)
+                is_there = session.query(does_exist.exists()).scalar()
 
-            if not is_there:
+                if not is_there:
 
-                # Create new QueryResult
-                result = models.QueryResult(
-                    article_publisher,
-                    article_headline,
-                    article_desc,
-                    article_url,
-                    article_date,
-                    article_sentiment
-                )
+                    # Create new QueryResult
+                    result = models.QueryResult(
+                        article_publisher,
+                        article_headline,
+                        article_desc,
+                        article_url,
+                        article_date,
+                        article_sentiment
+                    )
 
-                
+                    
 
-                # Add to database
-                session.add(result)
-                result.searched_queries.append(query)
-                session.commit()
-            else:
-                query_result = does_exist.first()
-                query_result.searched_queries.append(query)
+                    # Add to database
+                    session.add(result)
+                    result.searched_queries.append(query)
+                    session.commit()
+                else:
+                    query_result = does_exist.first()
+                    query_result.searched_queries.append(query)
 
 
-    date_limit = datetime.today() - timedelta(days=7)
+        date_limit = datetime.today() - timedelta(days=7)
 
-    query_table = session.query(models.Query)
+        query_table = session.query(models.Query)
 
-    # Find average sentiment for last seven days and update query sentiment.
-    for query in query_table:
-        total = 0.0
-        count = 0.0
-        # query_id = query.id
-        for result in query.query_results:
-            if result.publish_date > date_limit:
-                total += result.sentiment
-                count += 1.0
+        # Find average sentiment for last seven days and update query sentiment.
+        for query in query_table:
+            total = 0.0
+            count = 0.0
+            # query_id = query.id
+            for result in query.query_results:
+                if result.publish_date > date_limit:
+                    total += result.sentiment
+                    count += 1.0
 
         # avg = total / count
         # result_table = session.query(models.QueryResult).filter(models.QueryResult.parent_query == query_id,
@@ -124,10 +128,10 @@ def main(mytimer: func.TimerRequest) -> None:
         # for article in result_table:
         #     total += article.sentiment
         #     count += 1.0
+        if count > 0.0:
+            avg = total / count
 
-        avg = total / count
-
-        query.seven_d_sentiment = avg
-        session.commit()
-        logging.info(avg)
+            query.seven_d_sentiment = avg
+            session.commit()
+            logging.info(avg)
     session.close()

@@ -32,6 +32,7 @@ const Homepage = (props) => {
       body: JSON.stringify(queryData),
       headers: {
         "Content-Type": "application/json",
+        "autherisation-token" : ""
       },
     });
     const data = await response.json();
@@ -48,21 +49,21 @@ const Homepage = (props) => {
   return (
     <div className={styles.container}>
       <header>
-        <h1>Trender</h1>
+        <h1>Sentiment Trender</h1>
       </header>
       <section className={styles.SearchForm}>
         <SearchForm onSubmitQueryData={fetchPostQueryHandler} />
       </section>
       <section>
-        {/* {queries.length > 0 && (
+        {queries.length > 0 && (
           <SearchItem
             topic={queries[0].topic}
             searchResults={newResult}
             id={queries[0].query_id}
             setNewResults={setNewResult}
           />
-        )} */}
-        <p>Search Result: Query</p>
+        )}
+        {/* <p>Search Result: Query</p>
         <div className={styles.positiveSentiment}></div>
         <ul className={styles.searchlist}>
           <li className={`${styles.article} ${styles.neutral}`}>
@@ -80,7 +81,7 @@ const Homepage = (props) => {
             <p>publisher</p>
             <p>date</p>
           </li>
-        </ul>
+        </ul> */}
 
         {/* <SearchList
           queries={queries}

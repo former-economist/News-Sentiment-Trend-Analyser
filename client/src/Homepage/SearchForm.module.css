@@ -1,43 +1,52 @@
 .form {
-    display: block;
-    margin: auto;
-    margin-left: 1.25rem;
-    width: 50%;
-    /* background-color: red; */
-    padding: 1.125rem;
-    
+  display: block;
+  margin: auto;
+  margin-left: 1rem;
+  width: 50%;
+  /* background-color: red; */
+  padding: 1rem;
 }
 
-
 .input {
+  margin: 0.5rem;
+  padding: 0.5rem;
+  width: 40%;
+  text-align: left;
+  border: none;
+}
+
+.greyback {
+  background-color: rgb(222, 222, 222);
+  color: rgb(40, 40, 40);
+}
+
+@media (min-width: 40em) {
+  .input {
     margin: 0.5rem;
     padding: 0.5rem;
-    width: 50%;
+    width: 20rem;
     text-align: left;
     border: none;
     background-color: rgb(222, 222, 222);
     color: rgb(40, 40, 40);
+  }
+
+  .bigButton {
+    width: 21rem;
+  }
 }
 
-@media (min-width: 40em){
-    .input {
-        margin: 0.5rem;
-        padding: 0.5rem;
-        width: 20rem;
-        text-align: left;
-        border: none;
-        background-color: rgb(222, 222, 222);
-        color: rgb(40, 40, 40);
-    }
+.button {
+  text-align: center;
+  margin: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgb(40, 40, 40);
+  color: rgb(232, 231, 231);
+  border: none;
 }
 
-
-.button{
-    margin: 0.5rem;
-    padding: 0.5rem;
-    background-color: rgb(40, 40, 40);
-    color: rgb(232, 231, 231);
-    border: none;
+.submit{
+    margin-top: 0.5rem;
+    font-weight: 600; 
+    font-size: 1rem;
 }
-
-

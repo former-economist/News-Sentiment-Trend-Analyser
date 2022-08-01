@@ -1,27 +1,41 @@
 .sentiment{
+    font-weight: 600;
     margin-top: 0;
-    margin-left: 0;
-    margin-bottom: 1rem;
-    width: 75%;
-    color: rgb(40, 40, 40);
+    margin-left: 2rem;
+    margin-bottom: 4rem;
+    width: 40%;
     /* background-color: red; */
 }
 
-.positiveSentiment{
-    margin-top: 0;
-    margin-left: 3.25rem;
-    margin-bottom: 1rem;
-    width: 75%;
+@media (min-width: 40rem){
+    .sentiment{
+        /* margin-top: 0;
+        margin-left: 2rem;
+        margin-bottom: 4rem; */
+        width: 20rem;
+        /* background-color: red; */
+    }
+}
+
+.neutarlSentiment{
     height: 0.25rem;
-    color: rgb(40, 40, 40);
+    color: whitesmoke;
+    background-color: rgb(40, 40, 40);
+    
+}
+
+.positiveSentiment{
+    padding: 0.5rem;
+    color: whitesmoke;
     background-color: #004ADB;
 }
 
 .negativeSentiment{
-    margin-top: 0;
-    margin-left: 3.25rem;
-    margin-bottom: 1rem;
-    width: 75%;
+    padding: 0.5rem;
     color: rgb(40, 40, 40);
     background-color: #FF4040;
 }
+
+/* .sentiment {
+
+} */

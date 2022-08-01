@@ -57,7 +57,7 @@ const SearchForm = (props) => {
       <div>
         <label>
           <input
-            className={styles.input}
+            className={`${styles.input} ${styles.greyback}`}
             type="text"
             value={searchTerm}
             placeholder="Search"
@@ -69,7 +69,7 @@ const SearchForm = (props) => {
         return (
           <div key={i}>
             <input
-              className={styles.input}
+              className={`${styles.input} ${styles.greyback}`} 
               type="text"
               name="blockedWord"
               value={data.blockedWord}
@@ -77,7 +77,7 @@ const SearchForm = (props) => {
               onChange={(e) => restrictedTermHandler(e, i)}
             ></input>
             <input
-              className={styles.button}
+              className={`${styles.button}`}
               type="button"
               value="Remove"
               onClick={() => removeRestrictedWordHandler(i)}
@@ -86,12 +86,12 @@ const SearchForm = (props) => {
         );
       })}
       <div>
-        <button className={styles.button} type="button" value="Add" onClick={addRestrictedWordHandler}>
-          Add restricted Term
+        <button className={`${styles.input} ${styles.button} ${styles.bigButton}`} type="button" value="Add" onClick={addRestrictedWordHandler}>
+          Block Term
         </button>
       </div>
       <div>
-        <button className={styles.button} type="submit">Submit</button>
+        <button className={`${styles.input} ${styles.button} ${styles.bigButton} ${styles.submit}`} type="submit">Search</button>
       </div>
     </form>
   );

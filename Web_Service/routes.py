@@ -6,6 +6,7 @@ from email import message
 from functools import wraps
 import json
 from logging import exception
+from os import access
 from unittest import result
 
 
@@ -27,22 +28,24 @@ home_bp = Blueprint('homepage', __name__, url_prefix='/home')
 search_bp = Blueprint('search', __name__, url_prefix='/search')
 authorise_bp = Blueprint('registration', __name__, url_prefix='/authorisation')
 
-# def requires_token(fun):
-#     @wraps(fun)
-#     def decorated(*args, **kwargs):
-#         token = request.json['token']
+def requires_token(fun):
+    @wraps(fun)
+    def decorated(*args, **kwargs):
+        token = None
 
-#         if not token:
-#             return make_response(jsonify("Login token required"), 403)
-#         try:
-#             pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-#             user = models.User.query.filter_by(pub_id=pub_id['public_id']).first()
-#         except:
-#             return make_response(jsonify("Invalid token"), 403)
+        if 'autherisation-token' in request.headers:
+            token = request.headers['autherisation-token']
+        if not token:
+            return make_response(jsonify("Token required"), 403)
+        try:
+            pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
+            user = models.User.query.filter_by(pub_id=pub_id['public_id']).first()
+        except:
+            return make_response(jsonify({"message" : "Invalid token, please login"}), 403)
         
-#         return fun(user, *args, **kwargs)
+        return fun(user, *args, **kwargs)
     
-#     return decorated
+    return decorated
 
 @home_bp.route('/', methods=['GET'])
 def homepage():
@@ -110,26 +113,28 @@ def db_input():
     blocked_words = request.json["blocked-words"]
     search_string = create_search_string(search_topic, blocked_words)
     
-    token = request.json["token"]
+    
+    token = request.headers['autherisation-token']
+    
 
-    if request.method == 'GET':
-        query = models.Query.query.filter_by(topic=search_string).first()
-        query_results = query.query_results
-        if len(token) > 0:
-            try:
-                pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-                user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
-                query.searchers.append(user)
-                response_message = 'Results below.'
-                return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})       
-            except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
-                response_message = 'Token expired please sign. Results below.'
-                return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})
-        else:
-            response_message = 'Results below.'
-            return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})
+    # if request.method == 'GET':
+    #     query = models.Query.query.filter_by(topic=search_string).first()
+    #     query_results = query.query_results
+    #     if len(token) > 0:
+    #         try:
+    #             pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
+    #             user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
+    #             query.searchers.append(user)
+    #             response_message = 'Results below.'
+    #             return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})       
+    #         except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
+    #             response_message = 'Token expired please sign. Results below.'
+    #             return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})
+    #     else:
+    #         response_message = 'Results below.'
+    #         return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})
 
-    if len(token) > 0:
+    if len(token) > 1:
         try:
             if request.method == 'POST':
                 pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
@@ -189,6 +194,9 @@ def update_query(query_id):
             else:
                 return make_response(jsonify({'result' : 0}))
             # return make_response(jsonify([{'sentiment' : query.seven_d_sentiment}]), 200)
+        else:
+            return make_response(jsonify({'result' : 'None', 'sentiment': 'None'}))
+
 
     token = request.json['token']
     search_topic = request.json["topic"]
@@ -233,34 +241,31 @@ def update_query(query_id):
 
 
 @search_bp.route('/save/<int:queryresult_id>', methods=['POST'])
-# @requires_token
-def save_article(queryresult_id):
-    token = request.json["token"]
-    if len(token) > 0:
-        try:
-            pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-            user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
-            result = models.QueryResult.query.filter_by(id=queryresult_id).first()
-            user.saved_article.append(result)
-            database.session.commit()
+@requires_token
+def save_article(user, queryresult_id):
 
-            return make_response(jsonify({'message' : "Added"}), 201)
-        except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
-            return make_response(jsonify({'message' : 'Token expired, please sign in to save articles'}), 403)
-    else:
-        return make_response(jsonify({'message' : "Please sign in to save articles"}), 403)
+    result = models.QueryResult.query.filter_by(id=queryresult_id).first()
+    user.saved_article.append(result)
+    database.session.commit()
+
+    return make_response(jsonify({'message' : "Added"}), 201)
+# except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
+#         return make_response(jsonify({'message' : 'Token expired, please sign in to save articles'}), 403)
+#     else:
+#         return make_response(jsonify({'message' : "Please sign in to save articles"}), 403)
 
 @search_bp.route('/get_saved_articles', methods=['GET'])
-def get_saved_articles():
-    token = request.json["token"]
-    if len(token) > 0:
-        try:
-            pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-            user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
-            articles = user.saved_article
-            return jsonify([article.to_dict() for article in articles])
-        except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
-            return make_response(jsonify({'message' : "Please sign in to see saved articles"}), 403)
+@requires_token
+def get_saved_articles(user):
+    # token = request.json["token"]
+    # if len(token) > 0:
+    #     try:
+    #         pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
+    #         user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
+    articles = user.saved_article
+    return jsonify([article.to_dict() for article in articles])
+    #     except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
+    #         return make_response(jsonify({'message' : "Please sign in to see saved articles"}), 403)
 
-    else:
-        return make_response(jsonify({'message' : "Please sign in to see saved articles"}), 403)
+    # else:
+    #     return make_response(jsonify({'message' : "Please sign in to see saved articles"}), 403)

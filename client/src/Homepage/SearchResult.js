@@ -14,8 +14,8 @@ const SearchResult = (props) => {
             rel="noopener noreferrer"
           >{headline}</a></h2>
           
-          <p>{publisher}</p>
-          <p>{date}</p>
+          <p className={`${styles.neutralP}`}>{publisher}</p>
+          <p className={`${styles.neutralP}`}>{date}</p>
         </li>
       )}
       {sentiment > 0 && (
@@ -28,8 +28,8 @@ const SearchResult = (props) => {
             rel="noopener noreferrer"
           >{headline}</a></h2>
           
-          <p>{publisher}</p>
-          <p>{date}</p>
+          <p className={`${styles.positiveP}`}>{publisher}</p>
+          <p className={`${styles.positiveP}`}>{date}</p>
         </li>
       )}
       {sentiment < 0 && (
@@ -42,8 +42,8 @@ const SearchResult = (props) => {
             rel="noopener noreferrer"
           >{headline}</a></h2>
           
-          <p>{publisher}</p>
-          <p>{date}</p>
+          <p className={`${styles.negativeP}`}>{publisher}</p>
+          <p className={`${styles.negativeP}`}>{date}</p>
         </li>
       )}
     </>
