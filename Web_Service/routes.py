@@ -1,4 +1,4 @@
-from crypt import methods
+
 import datetime
 from datetime import timedelta
 
@@ -27,6 +27,7 @@ from scraper_funcs import create_search_string
 home_bp = Blueprint('homepage', __name__, url_prefix='/home')
 search_bp = Blueprint('search', __name__, url_prefix='/search')
 authorise_bp = Blueprint('registration', __name__, url_prefix='/authorisation')
+saved_bp = Blueprint('saved', __name__, url_prefix='/saved')
 
 def requires_token(fun):
     @wraps(fun)
@@ -49,22 +50,29 @@ def requires_token(fun):
 
 @home_bp.route('/', methods=['GET'])
 def homepage():
-    token = request.json["token"]
+    # token = request.json["token"]
+    token = None
 
-    if len(token) > 0:
+    if 'autherisation-token' in request.headers:
+        token = request.headers['autherisation-token']
+
+
+    if token:
         try:
             pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
             user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
             if user:
-                if len(user.searches) == 0:
-                    return make_response(jsonify({'message' : 'No saved queries'}), 200)
-                else:
-                    queries = user.searches
-                    return jsonify({"queries" :[query.to_dict() for query in queries]})
+                # if len(user.searches) == 0:
+                #     return make_response(jsonify({'message' : 'No saved queries'}), 200)
+                # else:
+                queries = user.searches
+                return make_response(jsonify({"queries" :[query.to_dict() for query in queries]}), 200)
+            if not user:
+                return make_response(jsonify([{'message':'Invalid token'}]))
         except exceptions.ExpiredSignatureError:
-            return make_response(jsonify({'message' : 'Token expired, login to see saved searches data'}), 403)
+            return make_response(jsonify([{'message' : 'Token expired, login to see saved searches data'}]), 403)
     else:
-        return make_response(jsonify({'message' : 'Login or sign up track search sentiments'}), 400)
+        return make_response(jsonify([{'message' : 'Hello'}]), 200)
 
 
 @authorise_bp.route('/register', methods=['POST'])
@@ -77,7 +85,7 @@ def register():
     does_exist = models.User.query.filter_by(email=email).first()
 
     if does_exist:
-        return make_response(jsonify({'message' : 'User already exist with this, please sign in.'}), 409)
+        return make_response(jsonify([{'message' : 'User already exist with this, please sign in.'}]), 409)
     
     if password == confirmed_password:
         hash = generate_password_hash(password)
@@ -86,9 +94,9 @@ def register():
         database.session.add(new_user)
         database.session.commit()
         database.session.close()
-        return make_response(jsonify('New user created'), 201)
+        return make_response(jsonify([{'message':'New user created'}]), 201)
     else:
-        return make_response(jsonify({'message' : 'Passwords do not match, please try again'}), 403)
+        return make_response(jsonify([{'message' : 'Passwords do not match, please try again'}]), 403)
 
 @authorise_bp.route('/login', methods=['POST'])
 def login():
@@ -107,62 +115,58 @@ def login():
     else:
         return make_response(jsonify({'message' : "Login details are not recongnised, would you like to sign up?"}), 401, {'Authentication': 'Login required'})
 
-@search_bp.route('/', methods=['POST', 'GET'])
+@search_bp.route('/', methods=['POST'])
 def db_input():
     search_topic = request.json["topic"]
     blocked_words = request.json["blocked-words"]
     search_string = create_search_string(search_topic, blocked_words)
+    token = None
+    if 'autherisation-token' in request.headers:
+        token = request.headers['autherisation-token']
     
-    
-    token = request.headers['autherisation-token']
-    
-
-    # if request.method == 'GET':
-    #     query = models.Query.query.filter_by(topic=search_string).first()
-    #     query_results = query.query_results
-    #     if len(token) > 0:
-    #         try:
-    #             pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-    #             user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
-    #             query.searchers.append(user)
-    #             response_message = 'Results below.'
-    #             return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})       
-    #         except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
-    #             response_message = 'Token expired please sign. Results below.'
-    #             return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})
-    #     else:
-    #         response_message = 'Results below.'
-    #         return jsonify({"message" : response_message,  "results" : [result.to_dict() for result in query_results]})
-
-    if len(token) > 1:
+    if token:
         try:
-            if request.method == 'POST':
-                pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-                user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
+            pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
+            user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
+            old_query = models.Query.query.filter_by(topic=search_string).first()
+
+            if old_query and user:
+                database.session.add(old_query)
+                old_query.searchers.append(user)
+                database.session.commit()
+
+                return make_response(jsonify([{'message' : 'Request acknowledged', 'query_id' : old_query.id, 'topic' : old_query.topic, 'sentiment': old_query.seven_d_sentiment}]), 202)
+            elif user:
+                query = models.Query(querys=search_string)
+                database.session.add(query)
+                query.searchers.append(user)
+                database.session.commit()
+                return make_response(jsonify([{'message' : 'Request Recieved', 'query_id' : query.id, 'topic' : query.topic, 'sentiment': query.seven_d_sentiment}]), 201)
+            elif not user:
+                return make_response(jsonify([{'message': 'Unrecognised token'}]), 403)
+            # try:
+            #     query = models.Query(querys=search_string)
+            #     database.session.add(query)
+            #     query.searchers.append(user)
+            #     database.session.commit()
                 
-                try:
-                    query = models.Query(querys=search_string)
-                    database.session.add(query)
-                    query.searchers.append(user)
-                    database.session.commit()
-                    
-                    return make_response(jsonify({'message' : 'Request Recieved', 'query_id' : query.id, 'query' : query.topic}), 201)
-                except exc.IntegrityError:
-                    return make_response(jsonify({'message' : 'Request Recieved', 'query_id' : query.id, 'query' : query.topic}), 202)
+            #     return make_response(jsonify({'message' : 'Request Recieved', 'query_id' : query.id, 'query' : query.topic}), 201)
+            # except exc.IntegrityError:
+            #     return make_response(jsonify({'message' : 'Request Recieved', 'query_id' : query.id, 'query' : query.topic}), 202)
         except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
             try:
                 query = models.Query(querys=search_string)
                 database.session.add(query)
                 database.session.commit()
-    
 
-                return make_response(jsonify({'message' : 'Token expired, sign in to see reults'}), 201)
+                return make_response(jsonify([{'message' : 'Token expired, sign in to see reults'}]), 201)
             except exc.IntegrityError:
-                return make_response(jsonify({'message' : 'Token expired, sign into to see reult'}), 202)
-            
+                return make_response(jsonify([{'message' : 'Token expired, sign into to see reult'}]), 202)
+        except:
+            return make_response(jsonify([{'message':'Internal server error'}]), 500)        
     else:
-        if request.method == 'POST':
-            old_query = models.Query.query.filter_by(topic=search_string).first()
+        old_query = models.Query.query.filter_by(topic=search_string).first()
+        try:
             if old_query:
                 return make_response(jsonify([{'message' : 'Request acknowledged', 'query_id' : old_query.id, 'topic' : old_query.topic, 'sentiment': old_query.seven_d_sentiment}]), 202)
             else:
@@ -170,9 +174,9 @@ def db_input():
                 database.session.add(query)
                 database.session.commit()
                 
-    
-
                 return make_response(jsonify([{'message' : 'Request Recieved', 'query_id' : query.id, 'topic' : query.topic, 'sentiment': query.seven_d_sentiment}]), 201)
+        except:
+            return make_response(jsonify([{'message':'Internal server error'}]), 500)
             # except exc.IntegrityError:
             #     # old_query = models.Query.query.filter_by(topic=search_string).first()
             #     return make_response(jsonify({'message' : 'Request acknowledged', 'query_id' : old_query.id, 'topic' : old_query.topic}))
@@ -184,7 +188,7 @@ def db_input():
 #         return make_response(jsonify([{'sentiment' : query.seven_d_sentiment}]), 200)
 
 @search_bp.route('/<int:query_id>', methods=['GET','PUT', 'DELETE'])
-def update_query(query_id):
+def get_query(query_id):
     if request.method == 'GET':
         query = models.Query.query.filter_by(id=query_id).first()
         if query:
@@ -192,55 +196,113 @@ def update_query(query_id):
             if len(results) > 1:
                 return make_response(jsonify({'result' : [result.to_dict() for result in results], 'topic' : query.topic, 'sentiment': query.seven_d_sentiment}), 200)
             else:
-                return make_response(jsonify({'result' : 0}))
+                return make_response(jsonify({'result' : 0}), 200)
             # return make_response(jsonify([{'sentiment' : query.seven_d_sentiment}]), 200)
         else:
-            return make_response(jsonify({'result' : 'None', 'sentiment': 'None'}))
+            return make_response(jsonify({'result' : 'None', 'sentiment': 'None'}), 200)
 
 
-    token = request.json['token']
+    # search_topic = request.json["topic"]
+    # blocked_words = request.json["blocked-words"]
+    # search_string = create_search_string(search_topic, blocked_words)
+    # token = None
+
+    # if 'autherisation-token' in request.headers:
+    #     token = request.headers['autherisation-token']
+
+    # if token:
+    #     try:
+    #         pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
+    #         user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
+    #     except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
+    #         return make_response(jsonify({'message' : 'Token expired, login to update query'}), 403)
+        
+    #     old_query = models.Query.query.filter_by(id=query_id).first()
+
+    #     if request.method == 'PUT':
+    #         try:
+    #             update_query = models.Query.query.filter_by(topic=search_string).first()
+            
+    #             if old_query:
+    #                 user.searches.remove(old_query)
+    #                 old_query.searchers.remove(user)
+    #                 database.session.commit()
+                
+    #             if update_query:
+    #                 update_query.searchers.append(user)
+    #                 database.session.commit()
+    #                 return make_response(jsonify({'message' : 'Query updated 1'}), 201)
+    #             else:
+    #                 new_query = models.Query(querys=search_string)
+    #                 new_query.searchers.append(user)
+    #                 database.session.commit()
+    #                 return make_response(jsonify({'message': 'Query updated 2'}), 201)
+    #         except TypeError:
+    #             return make_response(jsonify([{'message':'No JSON data given'}]), 500)
+    #         except KeyError:
+    #             return make_response(jsonify([{'message':'Incomplete JSON fields'}]), 500)
+    #         except:
+    #             return make_response(jsonify("Internal server error."), 500)
+        
+    #     if request.method == 'DELETE':
+    #         if old_query:
+    #             try:
+    #                 old_query.searchers.remove(user)
+    #                 return make_response(jsonify({'message': 'Query updated'}), 202)
+    #             except:
+    #                 return make_response(jsonify("Internal server error."), 500)
+    #         else:
+    #             return make_response(jsonify("Internal server error."), 500)            
+    # else:
+    #     return make_response(jsonify({'message' : 'Please sign in to update queries.'}), 403)
+
+@search_bp.route('/delete/<int:query_id>', methods=['DELETE'])
+@requires_token
+def delete_query(user, query_id):
+    query = models.Query.query.filter_by(id=query_id).first()
+    if query:
+        try:
+            query.searchers.remove(user)
+            database.session.commit()
+            return make_response(jsonify([{'message' : 'Query removed'}]), 200)
+        except:
+            return make_response(jsonify([{'message':'Internal server error'}]), 500)
+    else:
+        return make_response(jsonify([{'message' : 'Query does not exist with ID'}]), 404)
+
+@search_bp.route('/update/<int:query_id>', methods=['PUT'])
+@requires_token
+def update_query(user, query_id):
     search_topic = request.json["topic"]
     blocked_words = request.json["blocked-words"]
     search_string = create_search_string(search_topic, blocked_words)
 
-    if len(token) > 0:
-        try:
-            pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
-            user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
-        except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
-            return make_response(jsonify({'message' : 'Token expired, login to update query'}), 403)
-        
-        old_query = models.Query.query.filter_by(id=query_id).first()
+    old_query = models.Query.query.filter_by(id=query_id).first()
+    updated_query = update_query = models.Query.query.filter_by(topic=search_string).first()
+    try:
+        if old_query:
+            user.searches.remove(old_query)
+            old_query.searchers.remove(user)
+            database.session.commit()
 
-        if request.method == 'PUT':
-            update_query = models.Query.query.filter_by(topic=search_string).first()
-        
-            if old_query:
-                user.searches.remove(old_query)
-                old_query.searchers.remove(user)
-                database.session.commit()
-            
-            if update_query:
-                update_query.searchers.append(user)
-                database.session.commit()
-                return make_response(jsonify({'message' : 'Query updated 1'}), 201)
-            else:
-                new_query = models.Query(querys=search_string)
-                new_query.searchers.append(user)
-                database.session.commit()
-                return make_response(jsonify({'message': 'Query updated 2'}), 201)
-        
-        if request.method == 'DELETE':
-            if old_query:
-                old_query.searchers.remove(user)
-                return make_response(jsonify({'message': 'Query updated'}), 202)
-                
-            
-    else:
-        return make_response(jsonify({'message' : 'Please sign in to update queries.'}), 403)
+        if updated_query:
+            update_query.searchers.append(user)
+            database.session.commit()
+            return make_response(jsonify([{'message' : 'Query updated 1'}]), 201)
+        else:
+            new_query = models.Query(querys=search_string)
+            new_query.searchers.append(user)
+            database.session.commit()
+            return make_response(jsonify([{'message': 'Query updated 2'}]), 201)
+    except TypeError:
+        return make_response(jsonify([{'message':'No JSON data given'}]), 500)
+    except KeyError:
+        return make_response(jsonify([{'message':'Incomplete JSON fields'}]), 500)
+    except:
+        return make_response(jsonify("Internal server error."), 500)
 
 
-@search_bp.route('/save/<int:queryresult_id>', methods=['POST'])
+@saved_bp.route('/<int:queryresult_id>', methods=['POST'])
 @requires_token
 def save_article(user, queryresult_id):
 
@@ -254,7 +316,24 @@ def save_article(user, queryresult_id):
 #     else:
 #         return make_response(jsonify({'message' : "Please sign in to save articles"}), 403)
 
-@search_bp.route('/get_saved_articles', methods=['GET'])
+@saved_bp.route('/delete/<int:queryresult_id>', methods=['DELETE'])
+@requires_token
+def delete_article(user, queryresult_id):
+    query = models.QueryResult.query.filter_by(id=queryresult_id).first()
+    if query:
+        try:
+            user.saved_article.remove(query)
+            database.session.commit()
+            return make_response(jsonify([{'message':'Result removed'}]), 200)
+        except:
+            return make_response(jsonify([{'message':'Internal server error'}]), 500)
+    elif not query:
+        return make_response(jsonify([{'message':'Query result does not exist'}]), 404)
+    else:
+        return make_response(jsonify([{'message':'Method not allowed'}]), 405)
+
+
+@saved_bp.route('/get_saved_articles', methods=['GET'])
 @requires_token
 def get_saved_articles(user):
     # token = request.json["token"]
@@ -269,3 +348,4 @@ def get_saved_articles(user):
 
     # else:
     #     return make_response(jsonify({'message' : "Please sign in to see saved articles"}), 403)
+

@@ -27,11 +27,12 @@ def create_app(test_config: dict = {}):
     with app.app_context():
         database.init_app(app)
         database.create_all()
-    CORS(app)
-    from routes import search_bp, authorise_bp, home_bp
+    # CORS(app)
+    from routes import search_bp, authorise_bp, home_bp, saved_bp
     app.register_blueprint(search_bp)
     app.register_blueprint(authorise_bp)
     app.register_blueprint(home_bp)
+    app.register_blueprint(saved_bp)
     return app
 
 

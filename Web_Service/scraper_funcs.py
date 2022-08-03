@@ -16,10 +16,11 @@ def create_search_string(topic: str, blocked_words: list):
         primary_search = str(topic)
         excluded_terms = blocked_words
         for word in excluded_terms:
-            str_word = str(word)
-            dash = ' -'
-            dash += str_word
-            primary_search += dash
+            if len(word) > 0:
+                str_word = str(word)
+                dash = ' -'
+                dash += str_word
+                primary_search += dash
 
         return primary_search
     else:
@@ -32,7 +33,7 @@ def create_instance():
     Returns:
         GNews: A google news class object that will be used to carry out searches.
     """
-    google_object = GNews()
+    google_object = GNews(country="GB")
     return google_object
 
 

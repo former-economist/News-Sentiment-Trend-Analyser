@@ -98,11 +98,11 @@ def main(mytimer: func.TimerRequest) -> None:
                     # Add to database
                     session.add(result)
                     result.searched_queries.append(query)
-                    session.commit()
+                    
                 else:
                     query_result = does_exist.first()
                     query_result.searched_queries.append(query)
-
+        session.commit()
 
         date_limit = datetime.today() - timedelta(days=7)
 

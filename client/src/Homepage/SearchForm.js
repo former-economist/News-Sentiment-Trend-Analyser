@@ -5,6 +5,8 @@ import styles from "./SearchForm.module.css";
 const SearchForm = (props) => {
   const [restrictedWord, setRestrictedWord] = useState([]);
   const [searchTerm, setSearchTerm] = useState();
+  const [validSearchTerm, setValidSearchTerm] = useState(false);
+  const [formTouched, setFormTouched] = useState(false)
 
   const searchTermHandler = (e) => {
     setSearchTerm(e.target.value);
@@ -38,16 +40,28 @@ const SearchForm = (props) => {
     return finalList;
   };
 
+  const isSearchTermValid = !validSearchTerm && formTouched
+
   const submitHandler = (e) => {
     e.preventDefault();
-    const queryData = {
-      topic: searchTerm,
-      "blocked-words": createRestrictedTermList(),
-      token: "",
-    };
-    props.onSubmitQueryData(queryData);
-    setSearchTerm("");
-    setRestrictedWord([]);
+    setFormTouched(true)
+    const copy = searchTerm.slice()
+    if ((copy.trim()).length > 1) {
+      const queryData = {
+        topic: searchTerm,
+        "blocked-words": createRestrictedTermList(),
+        token: "",
+      };
+      props.onSubmitQueryData(queryData);
+      setSearchTerm("");
+      setRestrictedWord([]);
+      setFormTouched(false)
+    }
+    else{
+      setValidSearchTerm(false)
+      return;
+    }
+    
 
     // toResults('/result');
   };
@@ -62,6 +76,8 @@ const SearchForm = (props) => {
             value={searchTerm}
             placeholder="Search"
             onChange={searchTermHandler}
+            maxLength="50"
+            required
           />
         </label>
       </div>
@@ -81,6 +97,7 @@ const SearchForm = (props) => {
               type="button"
               value="Remove"
               onClick={() => removeRestrictedWordHandler(i)}
+              maxLength='20'
             />
           </div>
         );
@@ -93,6 +110,7 @@ const SearchForm = (props) => {
       <div>
         <button className={`${styles.input} ${styles.button} ${styles.bigButton} ${styles.submit}`} type="submit">Search</button>
       </div>
+      {isSearchTermValid && (<p>Search term cannot contain only white spaces</p>)}
     </form>
   );
 };
