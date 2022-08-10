@@ -4,12 +4,14 @@
   width: 100%;
 }
 
-@media (min-width: 40em) {
+@media (min-width: 45em) {
   .article {
+    margin: auto;
     margin-top: 0;
-    margin-left: 2rem;
+    /* margin-left: 2rem; */
     margin-bottom: 1rem;
     padding: 0.5rem;
+    /* width: 50%; */
     max-width: 50rem;
   }
 }

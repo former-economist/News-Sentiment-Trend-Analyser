@@ -1,18 +1,19 @@
 .sentiment{
     font-weight: 600;
-    margin-top: 0;
-    margin-left: 2rem;
-    margin-bottom: 4rem;
-    width: 40%;
+    margin: auto;
+    margin-top: 0;   
+    margin-bottom: 1rem;
+    width: 100%;
     /* background-color: red; */
+    text-align: center;
 }
 
-@media (min-width: 40rem){
+@media (min-width: 45rem){
     .sentiment{
-        /* margin-top: 0;
-        margin-left: 2rem;
-        margin-bottom: 4rem; */
-        width: 20rem;
+        margin: auto;
+        margin-top: 5rem;
+        width: 50rem;
+        text-align: center;
         /* background-color: red; */
     }
 }

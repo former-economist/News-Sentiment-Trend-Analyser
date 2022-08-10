@@ -4,4 +4,5 @@ WORKDIR /web_server
 RUN apt update && apt upgrade -y && apt install -y mariadb-client libmariadb-dev gcc && rm -rf /var/lib/apt/lists/* 
 COPY . .
 RUN pip install --progress-bar off --upgrade pip && pip install --progress-bar off -r requirements.txt
+EXPOSE 5000
 CMD [ "python", "app.py" ]

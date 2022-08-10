@@ -12,3 +12,4 @@ SQLAlchemy
 mariadb  == 1.0.11
 dateparser
 SQLAlchemy
+pytz

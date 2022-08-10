@@ -1,10 +1,17 @@
 .form {
   display: block;
   margin: auto;
-  margin-left: 1rem;
-  width: 50%;
-  /* background-color: red; */
+  margin-top: 5%;
+  align-items: center;
+  /* margin-left: 3rem; */
+  width: 40%;
+  /* background-color: red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center; */
   padding: 1rem;
+  /* border: 2px solid; */
 }
 
 .input {
@@ -20,9 +27,91 @@
   color: rgb(40, 40, 40);
 }
 
-@media (min-width: 40em) {
+.button {
+  text-align: center;
+  /* margin: 0.5rem; */
+  padding: 0.5rem;
+  background-color: rgb(40, 40, 40);
+  color: rgb(232, 231, 231);
+  border: none;
+}
+
+.submit {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+@media (max-width: 20em){
+  .form {
+    display: block;
+    margin: auto;
+    margin-top: 5%;
+    margin-left: 1rem;
+    width: 40%;
+    /* background-color: red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center; */
+    padding: 1rem;
+    /* border: 2px solid; */
+  }
+
   .input {
     margin: 0.5rem;
+    
+    padding: 0.5rem;
+    width: 50%;
+    text-align: left;
+    border: none;
+  }
+  
+  .button {
+    /* display: block; */
+    text-align: center;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgb(40, 40, 40);
+    color: rgb(232, 231, 231);
+    border: none;
+  }
+  
+  
+  .submit {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .removeButton {
+    margin-left: 0.1rem;
+  }
+
+}
+
+
+
+@media (min-width: 45em) {
+  .form {
+    display: block;
+    margin: auto;
+    margin-top: 2%;
+    align-items: center;
+    width: 20%;
+    
+    /* background-color: red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center; */
+    /* padding: 1rem; */
+    /* border: 2px solid black; */
+  }
+
+  .input {
+    margin: auto;
+    margin-top: 1rem;
     padding: 0.5rem;
     width: 20rem;
     text-align: left;
@@ -32,21 +121,15 @@
   }
 
   .bigButton {
+    text-align: center;
+    /* margin: 0.5rem; */
     width: 21rem;
+    padding: 0.5rem;
+    background-color: rgb(40, 40, 40);
+    color: rgb(232, 231, 231);
   }
-}
 
-.button {
-  text-align: center;
-  margin: 0.5rem;
-  padding: 0.5rem;
-  background-color: rgb(40, 40, 40);
-  color: rgb(232, 231, 231);
-  border: none;
-}
-
-.submit{
-    margin-top: 0.5rem;
-    font-weight: 600; 
-    font-size: 1rem;
+  .removeButton {
+    margin-left: 0.5rem;
+  }
 }

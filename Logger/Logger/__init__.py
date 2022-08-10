@@ -18,8 +18,11 @@ __test_db_engine__ = None
 
 def database_uri() -> str:
     """
-    A function to build the database connection string, using environment
-    variable settings.
+    Function to build the database connection string, using settings taken
+    from environment variables.
+
+    Returns:
+        str: Database connection String.
     """
 
     # If the connection string has been given, use it.
@@ -38,6 +41,13 @@ def database_uri() -> str:
 
 
 def main(mytimer: func.TimerRequest) -> None:
+    """
+    Timer function to collect QueryResult object for
+    all Query objects in database/
+
+    Args:
+        mytimer (func.TimerRequest): timer request base on CRON expression.
+    """
     global __test_db_connection_string__
 
     #Get or create and engine
@@ -112,22 +122,12 @@ def main(mytimer: func.TimerRequest) -> None:
         for query in query_table:
             total = 0.0
             count = 0.0
-            # query_id = query.id
             for result in query.query_results:
                 if result.publish_date > date_limit:
                     total += result.sentiment
                     count += 1.0
 
-        # avg = total / count
-        # result_table = session.query(models.QueryResult).filter(models.QueryResult.parent_query == query_id,
-        #                                                         models.QueryResult.publish_date > date_limit)
-
-        # total = 0.0
-        # count = 0.0
-
-        # for article in result_table:
-        #     total += article.sentiment
-        #     count += 1.0
+        
         if count > 0.0:
             avg = total / count
 

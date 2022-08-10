@@ -2,9 +2,20 @@ import styles from "./SearchResult.module.css";
 
 const SearchResult = (props) => {
   const { headline, publisher, date, url, sentiment } = props;
+
+  function checkURLIsValid(inputURL){
+    let checked = new URL(inputURL)
+    if(['http:', 'https:'].includes(checked.protocol)){
+      return true
+    };
+    return false
+  };
+
+  const isSafe = checkURLIsValid(url)
+  
   return (
     <>
-      {sentiment === 0 && (
+      {isSafe === true && sentiment === 0 && (
         <li className={`${styles.article} ${styles.neutral}`}>
           
             <h2><a
@@ -12,13 +23,14 @@ const SearchResult = (props) => {
             className={styles.Neutral}
             target="_blank"
             rel="noopener noreferrer"
+
           >{headline}</a></h2>
           
           <p className={`${styles.neutralP}`}>{publisher}</p>
           <p className={`${styles.neutralP}`}>{date}</p>
         </li>
       )}
-      {sentiment > 0 && (
+      {isSafe && sentiment > 0 && (
         <li className={`${styles.article} ${styles.positive}`}>
           
             <h2><a
@@ -32,11 +44,11 @@ const SearchResult = (props) => {
           <p className={`${styles.positiveP}`}>{date}</p>
         </li>
       )}
-      {sentiment < 0 && (
+      {isSafe && sentiment < 0 && (
         <li className={`${styles.article} ${styles.negative}`}>
           
             <h2><a
-            href={url}
+            href={checkURLIsValid(url) ? url : ""}
             className={styles.Negative}
             target="_blank"
             rel="noopener noreferrer"

@@ -9,6 +9,11 @@ import SearchForm from "./SearchForm";
 import styles from "./Homepage.module.css";
 import SearchItem from "./SearchItem";
 
+/**
+ *
+ * @param {} props
+ * @returns A screen with a search item if a search has been made.
+ */
 const Homepage = (props) => {
   const [queries, setQueries] = useState([]);
   const [newResult, setNewResult] = useState({
@@ -16,13 +21,22 @@ const Homepage = (props) => {
     sentiment: null,
     topic: null,
   });
+  const [intro, setIntro] = useState(true);
 
+  /**
+   *
+   * @param {Object} newData - Incoming data on Query object from API.
+   */
   const addQuery = (newData) => {
     setQueries((prevQueries) => {
       return [...newData];
     });
   };
-  // const navgation = useHistory
+
+  /**
+   *
+   * @param {string} enteredQueryData - Input data from form.
+   */
   async function fetchPostQueryHandler(enteredQueryData) {
     const queryData = {
       ...enteredQueryData,
@@ -32,7 +46,7 @@ const Homepage = (props) => {
       body: JSON.stringify(queryData),
       headers: {
         "Content-Type": "application/json",
-        "autherisation-token" : ""
+        "autherisation-token": "",
       },
     });
     const data = await response.json();
@@ -40,19 +54,47 @@ const Homepage = (props) => {
     addQuery(data);
     setNewResult({ result: 0 });
     console.log(data);
-    //   navgation.push({pathname='/results',
-    // state=})
   }
 
   console.log(queries[0]);
 
   return (
-    <div className={styles.container}>
+    <div >
       <header>
         <h1>Sentiment Trender</h1>
       </header>
+      {intro && (
+        <div className={`${styles.container}`}>
+          <div className={`${styles.child}`}>
+            <h2 className={`${styles.header}`}>Welcome to Sentiment Trender</h2>
+            <p>
+              We're a search engine for news articles that helps you figure out
+              how the sentiment of the sentiment of article based on it's
+              headline.
+            </p>
+          </div>
+          <div className={`${styles.child}`}>
+            <h3>All you have to do is</h3>
+            <ul>
+              <li>Input a topic you want to read about into the search.</li>
+              <li>
+                Wait a little bit while we find and analysis your results.
+              </li>
+              <li>
+                Once were finished well show you the results and the weekly
+                sentminent average for the topic.
+              </li>
+            </ul>
+          </div>
+          <h3>Add blocked word if you want to restrict it from the headlines</h3>
+        </div>
+      )}
+
       <section className={styles.SearchForm}>
-        <SearchForm onSubmitQueryData={fetchPostQueryHandler} />
+        <SearchForm
+          onSubmitQueryData={fetchPostQueryHandler}
+          setNewIntro={setIntro}
+        />
       </section>
       <section>
         {queries.length > 0 && (
