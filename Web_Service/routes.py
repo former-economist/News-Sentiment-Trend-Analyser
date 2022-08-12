@@ -144,7 +144,7 @@ def login():
     if existing_user and check_password_hash(existing_user.password, authorised.password):
         json_token = jwt.encode({"public_id": existing_user.pub_id, "exp": datetime.datetime.utcnow(
         ) + timedelta(minutes=20)}, '$SECRET_KEY', algorithm="HS256")
-        return jsonify({'token': json_token})
+        return make_response(jsonify({'token': json_token}), 201)
         # jwt.decode(json_token, '$SECRET_KEY', algorithms="HS256")
         # return make_response(jsonify({ json_token.decode("UTF-8")}), 202)
     else:
@@ -161,9 +161,12 @@ def db_input():
         JSON: JSON data containing message query ID, search topic,
         and sentiment value 
     """
-    search_topic = request.json["topic"]
-    blocked_words = request.json["blocked-words"]
-    search_string = create_search_string(search_topic, blocked_words)
+    try:
+        search_topic = request.json["topic"]
+        blocked_words = request.json["blocked-words"]
+        search_string = create_search_string(search_topic, blocked_words)
+    except KeyError:
+        return make_response(jsonify({'message' : 'No Json given'}), 500)
     token = None
     if 'autherisation-token' in request.headers:
         token = request.headers['autherisation-token']
@@ -181,13 +184,13 @@ def db_input():
                 old_query.searchers.append(user)
                 database.session.commit()
 
-                return make_response(jsonify([{'query_id': old_query.id, 'topic': old_query.topic, 'sentiment': old_query.seven_d_sentiment}]), 202)
+                return make_response(jsonify([{'message': 'Request acknowledged', 'query_id': old_query.id, 'topic': old_query.topic, 'sentiment': old_query.seven_d_sentiment}]), 202)
             elif user:
                 query = models.Query(querys=search_string)
                 database.session.add(query)
                 query.searchers.append(user)
                 database.session.commit()
-                return make_response(jsonify([{'query_id': query.id, 'topic': query.topic, 'sentiment': query.seven_d_sentiment}]), 201)
+                return make_response(jsonify([{'message': 'Request Recieved', 'query_id': query.id, 'topic': query.topic, 'sentiment': query.seven_d_sentiment}]), 201)
             elif not user:
                 return make_response(jsonify([{'message': 'Unrecognised token'}]), 403)
             # try:
@@ -252,7 +255,7 @@ def get_query(query_id):
         query = models.Query.query.filter_by(id=query_id).first()
         if query:
             results = query.query_results
-            if len(results) > 1:
+            if len(results) >= 1: #you changed this from > 1 to >= 1
                 return make_response(jsonify({'result': [result.to_dict() for result in results], 'topic': query.topic, 'sentiment': query.seven_d_sentiment}), 200)
             else:
                 return make_response(jsonify({'result': 0}), 200)
@@ -355,12 +358,15 @@ def update_query(user, query_id):
     Returns:
         JSON: JSON containing updated Query object ID
     """
-    search_topic = request.json["topic"]
-    blocked_words = request.json["blocked-words"]
-    search_string = create_search_string(search_topic, blocked_words)
+    try:
+        search_topic = request.json["topic"]
+        blocked_words = request.json["blocked-words"]
+        search_string = create_search_string(search_topic, blocked_words)
+    except TypeError:
+        return make_response(jsonify([{'message': 'JSON not given'}]), 500)
 
     old_query = models.Query.query.filter_by(id=query_id).first()
-    updated_query = update_query = models.Query.query.filter_by(
+    updated_query = models.Query.query.filter_by(
         topic=search_string).first()
     try:
         if old_query:
@@ -368,20 +374,18 @@ def update_query(user, query_id):
             old_query.searchers.remove(user)
             database.session.commit()
         else:
-            make_response(
+            return make_response(
                 jsonify([{'message': 'Query does not exist for given ID'}]), 404)
 
         if updated_query:
-            update_query.searchers.append(user)
+            updated_query.searchers.append(user)
             database.session.commit()
-            return make_response(jsonify([{'result': update_query.id}]), 201)
+            return make_response(jsonify([{'result': updated_query.id}]), 201)
         else:
             new_query = models.Query(querys=search_string)
             new_query.searchers.append(user)
             database.session.commit()
             return make_response(jsonify([{'result': new_query.id}]), 201)
-    except TypeError:
-        return make_response(jsonify([{'message': 'JSON not given'}]), 500)
     except KeyError:
         return make_response(jsonify([{'message': 'Insufficient JSON'}]), 500)
     except:
@@ -410,7 +414,7 @@ def save_article(user, queryresult_id):
 
         return make_response(jsonify([{'message': 'Added'}]), 201)
     else:
-        return make_response(jsonify([{'message': 'Query result does not exist with given id'}], 404))
+        return make_response(jsonify([{'message': 'Query result does not exist with given id'}], 200))
 # except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
 #         return make_response(jsonify({'message' : 'Token expired, please sign in to save articles'}), 403)
 #     else:
@@ -462,7 +466,7 @@ def get_saved_articles(user):
     #         pub_id = jwt.decode(token, '$SECRET_KEY', algorithms="HS256")
     #         user = models.User.query.filter_by(pub_id=pub_id["public_id"]).first()
     articles = user.saved_article
-    return jsonify([{'saved': [article.to_dict() for article in articles]}])
+    return make_response(jsonify([{'saved': [article.to_dict() for article in articles]}]), 200)
     #     except exceptions.ExpiredSignatureError or exceptions.InvalidSignatureError:
     #         return make_response(jsonify({'message' : "Please sign in to see saved articles"}), 403)
 

@@ -52,7 +52,11 @@ const SearchForm = (props) => {
     let restList = [...restrictedWord];
     let finalList = [];
     for (let i = 0; i < restList.length; i++) {
-      finalList.push(restList[i].blockedWord);
+      let blocked = (restList[i].blockedWord).trim()
+      if (blocked.length > 0){
+        finalList.push(blocked);
+      }
+      
     }
     return finalList;
   };
@@ -88,7 +92,8 @@ const SearchForm = (props) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    props.setNewIntro(false)
+    props.setNewIntro(false) // you moved this from below the prevent default
+    props.setServer(true)
     setFormTouched(true);
     setInvalidSearchTerm(false);
     setBlockedSameSearch(false);

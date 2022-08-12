@@ -62,6 +62,14 @@ class Query(Base):
     def __init__(self, querys: str):
         self.topic = querys
 
+    def to_dict(self):
+        dic = {
+            'id' : self.id,
+            'topic' : self.topic,
+            'weekly-sentiment' : self.seven_d_sentiment
+        }
+        return dic
+
 
 class QueryResult(Base):
     __tablename__ = 'queryresult'

@@ -1,7 +1,12 @@
+li{
+  width: 100%;
+}
+
 .article {
   margin-top: 0;
   padding: 0.5rem;
   width: 100%;
+  border: 5px solid black;
 }
 
 @media (min-width: 45em) {

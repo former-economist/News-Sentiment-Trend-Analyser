@@ -1,7 +1,10 @@
 
+import json
 from app import create_app, database
 import models
 import unittest
+from base64 import b64encode
+import dateparser
 
 
 class TestWebApp(unittest.TestCase):
@@ -54,7 +57,8 @@ class TestWebApp(unittest.TestCase):
         self.assertEqual(post_no_auth.status_code, 401)
 
         # Test login with unrecognised user details.
-        post_with_auth = self.client.post('/authorisation/login', username="john", password="password")
+        post_with_auth = self.client.post('/authorisation/login', headers={
+                                          'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
         self.assertEqual(post_with_auth.status_code, 401)
 
         # Create user
@@ -64,7 +68,9 @@ class TestWebApp(unittest.TestCase):
         self.assertEqual(post.status_code, 201)
 
         # Test for successful login with registered user.
-        self.assertEqual(post_with_auth.status_code, 201)
+        new_post = self.client.post('/authorisation/login', headers={
+                                    'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(new_post.status_code, 201)
 
     def test_post_query(self):
 
@@ -86,12 +92,284 @@ class TestWebApp(unittest.TestCase):
         self.assertEqual(post03.json, [
                          {'message': 'Request Recieved', 'query_id': 2, 'topic': 'rabbit', 'sentiment': None}])
 
-        # registration_json_data = {"username" : "john", "email": "john.email@student.com", "password" : "password", "confirmed-password" : "wrongpassword"}
-        # post = self.client.post('/authorisation/register', json=registration_json_data)
-        # self.assertEqual(post.status_code, 403)
+        # Create user
+        user_data = {"username": "john", "email": "john.email@student.com",
+                     "password": "password", "confirmed-password": "password"}
+        reg_post = self.client.post('/authorisation/register', json=user_data)
+        self.assertEqual(reg_post.status_code, 201)
 
-    def test_get_results():
+        # Test for successful login with registered user.
+        auth_post = self.client.post('/authorisation/login', headers={
+                                     'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(auth_post.status_code, 201)
+
+        token = auth_post.json['token']
+        json_data_03 = {"topic": "sunak", "blocked-words": []}
+        post04 = self.client.post(
+            '/search/', json=json_data_03, headers={'autherisation-token': token})
+        self.assertEqual(post04.json, [
+                         {'message': 'Request Recieved', 'query_id': 3, 'topic': 'sunak', 'sentiment': None}])
+        post05 = self.client.post(
+            '/search/', json=json_data_03, headers={'autherisation-token': token})
+        self.assertEqual(post05.json, [
+                         {'message': 'Request acknowledged', 'query_id': 3, 'topic': 'sunak', 'sentiment': None}])
+
+    def test_get_results(self):
+        # Create a query.
+        json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+        post01 = self.client.post('/search/', json=json_data_01)
+        self.assertEqual(post01.status_code, 201)
+
+        # Query exists with no results.
+        query_id = post01.json[0]['query_id']
+        get01 = self.client.get(f'/search/{query_id}')
+        self.assertEqual(get01.status_code, 200)
+        self.assertEqual(get01.json['result'], 0)
+
+        # Create result and associate it with the query.
+        result = models.QueryResult(
+            publisher="Shinty boys", 
+            headline="total maddness in the world of Shinty", 
+            description="Domhnall will not return. A legend lost. Latha uabhasachd airson a' gheama.",
+            url="https://www.thecamanboys.co.uk",
+            publish_date=dateparser.parse("10/07/2022"),
+            sentiment=-0.127457)
         
+        query = models.Query.query.filter_by(id=query_id).first()
+        
+        database.session.add(result)
+        result.searched_querys.append(query)
+        database.session.commit()
+
+        # Query exist with results
+        get02 = self.client.get(f'/search/{query_id}')
+        self.assertEqual(get01.status_code, 200)
+        found_publisher = get02.json['result'][0]['publisher']
+        self.assertEqual(found_publisher, 'Shinty boys')
+
+    def test_delete_query(self):
+        # Create user
+        user_data = {"username": "john", "email": "john.email@student.com",
+                     "password": "password", "confirmed-password": "password"}
+        reg_post = self.client.post('/authorisation/register', json=user_data)
+        self.assertEqual(reg_post.status_code, 201)
+
+        # Login.
+        log_post = self.client.post('/authorisation/login', headers={
+                                     'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(log_post.status_code, 201)
+
+        # Delete a query without a token.
+        post01 = self.client.delete('/search/delete/1')
+        self.assertEqual(post01.status_code, 403)
+        
+        # Create a query.
+        token = log_post.json['token']
+        json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+        post02 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+        self.assertEqual(post02.status_code, 201)
+
+        # Delete a query with a token.
+        post02 = self.client.delete('/search/delete/1', headers={'autherisation-token': token})
+        self.assertEqual(post02.status_code, 200)
+
+        # Delete query that does not exist.
+        post03 = self.client.delete('/search/delete/2', headers={'autherisation-token': token})
+        self.assertEqual(post03.status_code, 404)
+        
+        # User trys to delete a query not associated with them
+        token = log_post.json['token']
+        json_data_01 = {"topic": "iomain", "blocked-words": ['leadership']}
+        post04 = self.client.post('/search/', json=json_data_01)
+        self.assertEqual(post04.status_code, 201)
+
+        post05 = self.client.delete('/search/delete/2', headers={'autherisation-token': token})
+        self.assertEqual(post05.status_code, 500)
+
+    def test_update_query(self):
+        # Create user
+        user_data = {"username": "john", "email": "john.email@student.com",
+                     "password": "password", "confirmed-password": "password"}
+        reg_post = self.client.post('/authorisation/register', json=user_data)
+        self.assertEqual(reg_post.status_code, 201)
+
+        # Login.
+        log_post = self.client.post('/authorisation/login', headers={
+                                     'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(log_post.status_code, 201)
+
+        # # Update a query without a token but query does not exist.
+        token = log_post.json['token']
+        # post02 = self.client.put('/search/update/1', headers={'autherisation-token': token})
+        # print(post02.json)
+        # self.assertEqual(post02.status_code, 404)
+
+        # Create a query. 
+        json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+        post03 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+        self.assertEqual(post03.status_code, 201)
+
+        # Update a query without a token.
+        json_data_02 = {"topic": "hello", "blocked-words": ['leadership']}
+        post01 = self.client.put('/search/update/1', json=json_data_02, headers={'autherisation-token': token})
+        print(post01.json)
+        self.assertEqual(post01.status_code, 403)
+
+    def test_save_queries(self):
+        # Create user
+        user_data = {"username": "john", "email": "john.email@student.com",
+                     "password": "password", "confirmed-password": "password"}
+        reg_post = self.client.post('/authorisation/register', json=user_data)
+        self.assertEqual(reg_post.status_code, 201)
+
+        # Login.
+        log_post = self.client.post('/authorisation/login', headers={
+                                     'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(log_post.status_code, 201)
+
+        # Save an article without a token.
+        post01 = self.client.post('/saved/1')
+        self.assertEqual(post01.status_code, 403)
+
+        # Create a query.
+        token = log_post.json['token']
+        json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+        post02 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+        self.assertEqual(post02.status_code, 201)
+
+        query_id = post02.json[0]['query_id']
+
+        # Create result and associate it with the query.
+        result = models.QueryResult(
+            publisher="Shinty boys", 
+            headline="total maddness in the world of Shinty", 
+            description="Domhnall will not return. A legend lost. Latha uabhasachd airson a' gheama.",
+            url="https://www.thecamanboys.co.uk",
+            publish_date=dateparser.parse("10/07/2022"),
+            sentiment=-0.127457)
+        
+        query = models.Query.query.filter_by(id=query_id).first()
+        
+        database.session.add(result)
+        result.searched_querys.append(query)
+        database.session.commit()
+
+        # Save an article with a token.
+        post03 = self.client.post('/saved/1', headers={'autherisation-token': token})
+        self.assertEqual(post03.status_code, 201)
+
+        # Save an article that does not exist.
+        post04 = self.client.post('/saved/5', headers={'autherisation-token': token})
+        self.assertEqual(post04.status_code, 200)
+
+    def test_delete_saved_article(self):
+        # Create user
+        user_data = {"username": "john", "email": "john.email@student.com",
+                     "password": "password", "confirmed-password": "password"}
+        reg_post = self.client.post('/authorisation/register', json=user_data)
+        self.assertEqual(reg_post.status_code, 201)
+
+        # Login.
+        log_post = self.client.post('/authorisation/login', headers={
+                                     'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(log_post.status_code, 201)
+
+        # Delete saved article without a token.
+        post01 = self.client.delete('/saved/delete/1')
+        self.assertEqual(post01.status_code, 403)
+
+        # Create a query.
+        token = log_post.json['token']
+        json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+        post02 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+        self.assertEqual(post02.status_code, 201)
+
+        query_id = post02.json[0]['query_id']
+
+        # Create result and associate it with the query.
+        result = models.QueryResult(
+            publisher="Shinty boys", 
+            headline="total maddness in the world of Shinty", 
+            description="Domhnall will not return. A legend lost. Latha uabhasachd airson a' gheama.",
+            url="https://www.thecamanboys.co.uk",
+            publish_date=dateparser.parse("10/07/2022"),
+            sentiment=-0.127457)
+        
+        query = models.Query.query.filter_by(id=query_id).first()
+        
+        database.session.add(result)
+        result.searched_querys.append(query)
+        database.session.commit()
+
+        # Save an article with a token.
+        post03 = self.client.post('/saved/1', headers={'autherisation-token': token})
+        self.assertEqual(post03.status_code, 201)
+
+        # Delete an article with a token.
+        post04 = self.client.delete('/saved/delete/1', headers={'autherisation-token': token})
+        self.assertEqual(post04.status_code, 200)
+        self.assertEqual(post04.json[0]['message'], 'Result removed')
+
+        # Delete an article  not associated with user.
+        post05 = self.client.delete('/saved/delete/1', headers={'autherisation-token': token})
+        self.assertEqual(post05.status_code, 500)
+        self.assertEqual(post05.json[0]['message'], 'Internal server error')
+
+        # Delete an article that does not exist.
+        post06 = self.client.delete('/saved/delete/0', headers={'autherisation-token': token})
+        self.assertEqual(post06.status_code, 404)
+        self.assertEqual(post06.json[0]['message'], 'Query result does not exist')
+
+    def test_get_saved_articles(self):
+        # Create user
+        user_data = {"username": "john", "email": "john.email@student.com",
+                    "password": "password", "confirmed-password": "password"}
+        reg_post = self.client.post('/authorisation/register', json=user_data)
+        self.assertEqual(reg_post.status_code, 201)
+
+        # Login.
+        log_post = self.client.post('/authorisation/login', headers={
+                                    'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+        self.assertEqual(log_post.status_code, 201)
+
+        # Delete saved article without a token.
+        post01 = self.client.delete('/saved/delete/1')
+        self.assertEqual(post01.status_code, 403)
+
+        # Create a query.
+        token = log_post.json['token']
+        json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+        post02 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+        self.assertEqual(post02.status_code, 201)
+
+        query_id = post02.json[0]['query_id']
+
+        # Create result and associate it with the query.
+        result = models.QueryResult(
+            publisher="Shinty boys", 
+            headline="total maddness in the world of Shinty", 
+            description="Domhnall will not return. A legend lost. Latha uabhasachd airson a' gheama.",
+            url="https://www.thecamanboys.co.uk",
+            publish_date=dateparser.parse("10/07/2022"),
+            sentiment=-0.127457)
+        
+        query = models.Query.query.filter_by(id=query_id).first()
+        
+        database.session.add(result)
+        result.searched_querys.append(query)
+        database.session.commit()
+
+        # Save an article with a token.
+        post03 = self.client.post('/saved/1', headers={'autherisation-token': token})
+        self.assertEqual(post03.status_code, 201)
+
+        # Get all saved articles
+        get01 = self.client.get('/saved/get_saved_articles', headers={'autherisation-token': token})
+        self.assertEqual(get01.status_code, 200)
+        found_publisher = get01.json[0]['saved'][0]['publisher']
+        self.assertEqual(found_publisher, 'Shinty boys')
+
+
 
 if __name__ == "__main__":
     unittest.main()

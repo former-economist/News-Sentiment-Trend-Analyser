@@ -13,15 +13,18 @@ def create_search_string(topic: str, blocked_words: list):
         str: A string containing search topic, and excluded terms prefixed by a dash.
     """
     primary_search = str(topic)
-    excluded_terms = blocked_words
-    for word in excluded_terms:
-        if len(word) > 0:
+    if len(primary_search) >= 1:
+        excluded_terms = blocked_words
+        for word in excluded_terms:
             str_word = str(word)
-            dash = ' -'
-            dash += str_word
-            primary_search += dash
+            if len(str_word) > 0:
+                dash = ' -'
+                dash += str_word
+                primary_search += dash
 
-    return primary_search
+        return primary_search
+    else:
+        raise Exception("Topic arguement must not be blank")
 
 
 def create_instance():

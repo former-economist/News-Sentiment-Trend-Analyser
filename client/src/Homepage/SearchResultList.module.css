@@ -3,3 +3,7 @@
     border: 0;
     list-style: none;
 }
+
+li {
+    width: 100%;
+}

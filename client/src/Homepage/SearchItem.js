@@ -5,7 +5,7 @@ import SearchResultList from "./SearchResultList";
 import Sentiment from "./Sentiment";
 
 const SearchItem = (props) => {
-  const { topic, searchResults, setNewResults, id } = props;
+  const { topic, searchResults, setNewResults, id, setServer} = props;
   console.log(props.topic);
   // console.log(props.sentiment)
   // const {findResults, id, topic} = props;
@@ -38,24 +38,27 @@ const SearchItem = (props) => {
    * Fetches data every ten Query results from API every ten seconds.
    */
   useEffect(() => {
-    let interval = setInterval(() => {
-      console.log(id);
-      const query_id = id;
-      fetch(`/search/${query_id}`, {
-        method: "GET",
-      })
-        .then((res) => {
-          return res.json();
+      let interval = setInterval(() => {
+        console.log(id);
+        const query_id = id;
+        fetch(`/search/${query_id}`, {
+          method: "GET",
         })
-        .then((data) => {
-          const items = data;
-          setNewResults(items);
-        });
-    }, 10000);
-    return () => {
-      clearInterval(interval);
-     };
-  }, [setNewResults, id]);
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            const items = data;
+            setNewResults(items);
+          })
+          .catch((err) => {
+            setServer(false)
+          })
+      }, 10000);
+      return () => {
+        clearInterval(interval);
+       };
+  }, [setNewResults, id, setServer]);
 
   return (
     <>

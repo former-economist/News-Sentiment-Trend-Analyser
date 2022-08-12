@@ -128,10 +128,10 @@ def main(mytimer: func.TimerRequest) -> None:
                     count += 1.0
 
         
-        if count > 0.0:
-            avg = total / count
+            if count > 0.0:
+                avg = total / count
 
-            query.seven_d_sentiment = avg
-            session.commit()
-            logging.info(avg)
+                query.seven_d_sentiment = avg
+                session.commit()
+                logging.info(avg)
     session.close()

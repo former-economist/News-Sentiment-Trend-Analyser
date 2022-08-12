@@ -22,6 +22,7 @@ const Homepage = (props) => {
     topic: null,
   });
   const [intro, setIntro] = useState(true);
+  const [serverRunning, setServerRunning] = useState(true);
 
   /**
    *
@@ -67,26 +68,26 @@ const Homepage = (props) => {
         <div className={`${styles.container}`}>
           <div className={`${styles.child}`}>
             <h2 className={`${styles.header}`}>Welcome to Sentiment Trender</h2>
-            <p>
+            <p className={`${styles.paragraphs}`}>
               We're a search engine for news articles that helps you figure out
               how the sentiment of the sentiment of article based on it's
               headline.
             </p>
           </div>
           <div className={`${styles.child}`}>
-            <h3>All you have to do is</h3>
+            <h3 className={`${styles.header3}`}>All you have to do is</h3>
             <ul>
-              <li>Input a topic you want to read about into the search.</li>
-              <li>
+              <li className={`${styles.liItem}`}>Input a topic you want to read about into the search.</li>
+              <li className={`${styles.liItem}`}>
                 Wait a little bit while we find and analysis your results.
               </li>
-              <li>
-                Once were finished well show you the results and the weekly
-                sentminent average for the topic.
+              <li className={`${styles.liItem}`}>
+                Results and the weekly
+                sentminent average for the topic will show below.
               </li>
             </ul>
           </div>
-          <h3>Add blocked word if you want to restrict it from the headlines</h3>
+          <h3 className={`${styles.header3}`}>Add blocked word if you want to restrict it from the headlines</h3>
         </div>
       )}
 
@@ -94,17 +95,21 @@ const Homepage = (props) => {
         <SearchForm
           onSubmitQueryData={fetchPostQueryHandler}
           setNewIntro={setIntro}
+          setServer={setServerRunning}
         />
       </section>
       <section>
-        {queries.length > 0 && (
+        {!serverRunning && <p>Oh no we've lost connect to the server</p>}
+        {queries.length > 0 && serverRunning && (
           <SearchItem
             topic={queries[0].topic}
             searchResults={newResult}
             id={queries[0].query_id}
             setNewResults={setNewResult}
+            setServer={setServerRunning}
           />
         )}
+        
         {/* <p>Search Result: Query</p>
         <div className={styles.positiveSentiment}></div>
         <ul className={styles.searchlist}>
