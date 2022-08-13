@@ -11,7 +11,7 @@ import sqlalchemy
 from sqlalchemy import exc, delete
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import exists
-from .scraper_funcs import create_search_string, create_instance, create_dated_instance, search, analysis_sentiment
+from .scraper_funcs import create_search_string, create_instance, create_dated_instance, search, analysis_sentiment, calculate_sentiment
 
 __test_db_engine__ = None
 
@@ -78,14 +78,15 @@ def main(mytimer: func.TimerRequest) -> None:
             session.delete(query)
             session.commit()
         else:
-            analysis_sentiment(found_articles)
+            # analysis_sentiment(found_articles)
             for article in found_articles:
                 article_publisher = article['publisher']['title']
                 article_headline = article['title']
                 article_desc = article['description']
                 article_url = article['url']
                 article_date = dateparser.parse(article['published date'])
-                article_sentiment = article['sentiment']
+                article_sentiment = calculate_sentiment(article=article)
+                # article_sentiment = article['sentiment']
 
                 does_exist = session.query(models.QueryResult).filter(
                     models.QueryResult.headline == article_headline)
@@ -117,6 +118,8 @@ def main(mytimer: func.TimerRequest) -> None:
         date_limit = datetime.today() - timedelta(days=7)
 
         query_table = session.query(models.Query)
+
+        #This is ridiculously slow, fix it.
 
         # Find average sentiment for last seven days and update query sentiment.
         for query in query_table:

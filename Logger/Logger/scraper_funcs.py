@@ -98,3 +98,12 @@ def analysis_sentiment(search_results: list):
         blob = TextBlob(string)
         sentiment = blob.sentiment.polarity
         article['sentiment'] = sentiment
+
+def calculate_sentiment(article):
+    string = article['title']
+    string += " "
+    string += article['description']
+    blob = TextBlob(string)
+    sentiment = blob.sentiment.polarity
+    article['sentiment'] = sentiment
+    return article['sentiment']
