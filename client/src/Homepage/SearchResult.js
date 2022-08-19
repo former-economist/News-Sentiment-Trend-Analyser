@@ -16,7 +16,7 @@ const SearchResult = (props) => {
   return (
     <>
       {isSafe === true && sentiment === 0 && (
-        <li className={`${styles.article} ${styles.neutral}`}>
+        <li className={`${styles.article} ${styles.neutral}`} title="Neutral">
           
             <h2><a
             href={url}
@@ -31,7 +31,7 @@ const SearchResult = (props) => {
         </li>
       )}
       {isSafe && sentiment > 0 && (
-        <li className={`${styles.article} ${styles.positive}`}>
+        <li className={`${styles.article} ${styles.positive}`} title="Positive">
           
             <h2><a
             href={url}
@@ -45,7 +45,7 @@ const SearchResult = (props) => {
         </li>
       )}
       {isSafe && sentiment < 0 && (
-        <li className={`${styles.article} ${styles.negative}`}>
+        <li className={`${styles.article} ${styles.negative}`} title="Negative">
           
             <h2><a
             href={checkURLIsValid(url) ? url : ""}

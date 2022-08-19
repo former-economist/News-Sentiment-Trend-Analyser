@@ -60,7 +60,7 @@ const Homepage = (props) => {
   console.log(queries[0]);
 
   return (
-    <div >
+    <div>
       <header>
         <h1>Sentiment Trender</h1>
       </header>
@@ -77,17 +77,21 @@ const Homepage = (props) => {
           <div className={`${styles.child}`}>
             <h3 className={`${styles.header3}`}>All you have to do is</h3>
             <ul>
-              <li className={`${styles.liItem}`}>Input a topic you want to read about into the search.</li>
+              <li className={`${styles.liItem}`}>
+                Input a topic you want to read about into the search.
+              </li>
               <li className={`${styles.liItem}`}>
                 Wait a little bit while we find and analysis your results.
               </li>
               <li className={`${styles.liItem}`}>
-                Results and the weekly
-                sentminent average for the topic will show below.
+                Results and the weekly sentminent average for the topic will
+                show below.
               </li>
             </ul>
           </div>
-          <h3 className={`${styles.header3}`}>Add blocked word if you want to restrict it from the headlines</h3>
+          <h3 className={`${styles.header3}`}>
+            Add blocked word if you want to restrict it from the headlines
+          </h3>
         </div>
       )}
 
@@ -99,7 +103,14 @@ const Homepage = (props) => {
         />
       </section>
       <section>
-        {!serverRunning && <p>Oh no we've lost connect to the server</p>}
+        <div className={`${styles.container}`}>
+          {!serverRunning && (
+            <p className={`${styles.paragraphs}`}>
+              Oh no we've lost connection to the server
+            </p>
+          )}
+        </div>
+
         {queries.length > 0 && serverRunning && (
           <SearchItem
             topic={queries[0].topic}
@@ -109,7 +120,7 @@ const Homepage = (props) => {
             setServer={setServerRunning}
           />
         )}
-        
+
         {/* <p>Search Result: Query</p>
         <div className={styles.positiveSentiment}></div>
         <ul className={styles.searchlist}>

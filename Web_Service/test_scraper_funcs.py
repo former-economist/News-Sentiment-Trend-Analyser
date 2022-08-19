@@ -1,6 +1,6 @@
 import unittest
 from gnews import GNews
-from scraper_funcs import create_search_string, create_instance, search, analysis_sentiment
+from scraper_funcs import create_search_string, create_instance, search, calculate_sentiment
 
 
 class TestScraperFunciton(unittest.TestCase):
@@ -34,6 +34,14 @@ class TestScraperFunciton(unittest.TestCase):
         with self.assertRaises(Exception):
             search_results = search(search_term_02, gnews_obj_02)
 
+    def test_calculate_sentiment(self):
+        positive_data = {"title":"Happy fun time in the sun", "description" : "Brilliant dayout in the sunshine"}
+        negative_data = {"title":"Death and destruction in genocide", "description" : "Terrible catastrophe at horrific event"}
 
+        pos_sent = calculate_sentiment(positive_data)
+        neg_sent = calculate_sentiment(negative_data)
+
+        self.assertGreater(pos_sent, 0)
+        self.assertLess(neg_sent, 0)     
 if __name__ == "__main__":
     unittest.main()

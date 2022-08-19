@@ -27,6 +27,15 @@ ul{
   line-height: 1.5rem;
   overflow: hidden;
 }
+
+.centre{
+  margin:auto;
+  width: 50%;
+  border: 2px solid black;
+  text-align: center;
+  vertical-align: middle;
+}
+
 .container{
   margin: auto;
   width: 90%;
@@ -34,6 +43,7 @@ ul{
 .paragraphs{
   margin-left: 0.5rem;
   max-width: 50%;
+  padding: auto;
 }
 
 .header3{
@@ -57,10 +67,11 @@ ul{
     max-width: 20ch;
   }
 
-  p{
+  .paragraphs{
     margin-left: 0.5rem;
     margin-right: 1rem;
     max-width: 30ch;
+    padding: 0;
   }
 
   h3{
@@ -81,9 +92,10 @@ ul{
     margin: auto;
     width: 40%;
   }
-  p{
+  .paragraphs{
     margin-left: 0.5rem;
-    max-width: 50%;
+    max-width: 70%;
+    padding: auto;
   }
 
   h3{

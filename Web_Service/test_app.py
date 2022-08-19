@@ -186,7 +186,40 @@ class TestWebApp(unittest.TestCase):
         post05 = self.client.delete('/search/delete/2', headers={'autherisation-token': token})
         self.assertEqual(post05.status_code, 500)
 
-    def test_update_query(self):
+    # def test_update_query(self):
+    #     # Create user
+    #     user_data = {"username": "john", "email": "john.email@student.com",
+    #                  "password": "password", "confirmed-password": "password"}
+    #     reg_post = self.client.post('/authorisation/register', json=user_data)
+    #     self.assertEqual(reg_post.status_code, 201)
+
+    #     # Login.
+    #     log_post = self.client.post('/authorisation/login', headers={
+    #                                  'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
+    #     self.assertEqual(log_post.status_code, 201)
+
+    #     # # Update a query without a token but query does not exist.
+    #     token = log_post.json['token']
+    #     # post02 = self.client.put('/search/update/1', headers={'autherisation-token': token})
+    #     # print(post02.json)
+    #     # self.assertEqual(post02.status_code, 404)
+
+    #     # Create a query. 
+    #     json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
+    #     post03 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+    #     self.assertEqual(post03.status_code, 201)
+
+    #     # Update a query without a token.
+    #     json_data_02 = {"topic": "hello", "blocked-words": ['leadership']}
+    #     post01 = self.client.put('/search/update/1', json=json_data_02, headers={'autherisation-token': token})
+    #     print(post01.json)
+    #     self.assertEqual(post01.status_code, 403)
+
+    def test_homepage(self):
+        # Anonymous user access the application, has no saved queries
+        get01 = self.client.get('/home/')
+        self.assertEqual(get01.json[0]['queries'], 0)
+
         # Create user
         user_data = {"username": "john", "email": "john.email@student.com",
                      "password": "password", "confirmed-password": "password"}
@@ -198,22 +231,26 @@ class TestWebApp(unittest.TestCase):
                                      'Authorization': 'Basic ' + b64encode(b"john:password").decode('utf-8')})
         self.assertEqual(log_post.status_code, 201)
 
-        # # Update a query without a token but query does not exist.
+        # Create a query.
         token = log_post.json['token']
-        # post02 = self.client.put('/search/update/1', headers={'autherisation-token': token})
-        # print(post02.json)
-        # self.assertEqual(post02.status_code, 404)
-
-        # Create a query. 
         json_data_01 = {"topic": "shinty", "blocked-words": ['leadership']}
-        post03 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
-        self.assertEqual(post03.status_code, 201)
+        post02 = self.client.post('/search/', json=json_data_01, headers={'autherisation-token': token})
+        self.assertEqual(post02.status_code, 201)
 
-        # Update a query without a token.
-        json_data_02 = {"topic": "hello", "blocked-words": ['leadership']}
-        post01 = self.client.put('/search/update/1', json=json_data_02, headers={'autherisation-token': token})
-        print(post01.json)
-        self.assertEqual(post01.status_code, 403)
+        # Check the query has been added to the users queries
+        get02 = self.client.get('/home/', headers={'autherisation-token': token})
+        self.assertEqual(get02.status_code, 200)
+        self.assertEqual(get02.json['queries'][0], {'7 day sentiment': None, 'id': 1, 'topic': 'shinty -leadership'})
+        # print(get02.json['queries'][0])
+
+        # Delete query associated with the user
+        delete01 = self.client.delete('/search/delete/1', headers={'autherisation-token': token})
+        self.assertEqual(delete01.status_code, 200)
+
+        # Check to ensure the query is no longer associated with user.
+        get03 = self.client.get('/home/', headers={'autherisation-token': token})
+        self.assertEqual(get03.status_code, 200)
+        self.assertEqual(len(get03.json['queries']), 0)
 
     def test_save_queries(self):
         # Create user
@@ -261,6 +298,12 @@ class TestWebApp(unittest.TestCase):
         # Save an article that does not exist.
         post04 = self.client.post('/saved/5', headers={'autherisation-token': token})
         self.assertEqual(post04.status_code, 200)
+
+        # Get all saved articles
+        get01 = self.client.get('/saved/get_saved_articles', headers={'autherisation-token': token})
+        len_of_saved = len(get01.json[0]['saved'])
+        self.assertEqual(get01.status_code, 200)
+        self.assertEqual(len_of_saved, 1)
 
     def test_delete_saved_article(self):
         # Create user
@@ -320,6 +363,12 @@ class TestWebApp(unittest.TestCase):
         self.assertEqual(post06.status_code, 404)
         self.assertEqual(post06.json[0]['message'], 'Query result does not exist')
 
+        # Get all saved articles
+        get01 = self.client.get('/saved/get_saved_articles', headers={'autherisation-token': token})
+        len_of_saved = len(get01.json[0]['saved'])
+        self.assertEqual(get01.status_code, 200)
+        self.assertEqual(len_of_saved, 0)
+
     def test_get_saved_articles(self):
         # Create user
         user_data = {"username": "john", "email": "john.email@student.com",
@@ -367,7 +416,9 @@ class TestWebApp(unittest.TestCase):
         get01 = self.client.get('/saved/get_saved_articles', headers={'autherisation-token': token})
         self.assertEqual(get01.status_code, 200)
         found_publisher = get01.json[0]['saved'][0]['publisher']
+        len_of_saved = len(get01.json[0]['saved'])
         self.assertEqual(found_publisher, 'Shinty boys')
+        self.assertEqual(len_of_saved, 1)
 
 
 

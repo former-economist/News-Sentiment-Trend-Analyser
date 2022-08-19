@@ -43,7 +43,7 @@ def database_uri() -> str:
 def main(mytimer: func.TimerRequest) -> None:
     """
     Timer function to collect QueryResult object for
-    all Query objects in database/
+    all Query objects in database.
 
     Args:
         mytimer (func.TimerRequest): timer request base on CRON expression.
