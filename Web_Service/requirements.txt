@@ -1,7 +1,6 @@
 Flask>=2.0
 Flask-SQLAlchemy>=2.5
 mariadb  == 1.0.10
-celery
 SQLAlchemy
 pika
 gnews

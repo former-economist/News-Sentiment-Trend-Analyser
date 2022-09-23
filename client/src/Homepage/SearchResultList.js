@@ -1,8 +1,7 @@
 import SearchResult from "./SearchResult";
-import styles from "./SearchResultList.module.css"
+import styles from "./SearchResultList.module.css";
 
 const SearchResultList = (props) => {
-  console.log(props.SearchResult);
   return (
     <ul className={styles.searchlist}>
       {props.SearchResult.result.map((finding) => (

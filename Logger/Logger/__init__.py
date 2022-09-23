@@ -1,17 +1,21 @@
-from genericpath import exists
-from sqlite3 import IntegrityError
-import azure.functions as func
 import datetime
-from datetime import datetime, timedelta
 import logging
-from . import models
 import os
+from datetime import datetime, timedelta
+from sqlite3 import IntegrityError
+
+import azure.functions as func
 import dateparser
 import sqlalchemy
-from sqlalchemy import exc, delete
+from genericpath import exists
+from sqlalchemy import delete, exc
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import exists
-from .scraper_funcs import create_search_string, create_instance, create_dated_instance, search, analysis_sentiment, calculate_sentiment
+
+from . import models
+from .scraper_funcs import (analysis_sentiment, calculate_sentiment,
+                            create_dated_instance, create_instance,
+                            create_search_string, search)
 
 __test_db_engine__ = None
 
@@ -104,12 +108,10 @@ def main(mytimer: func.TimerRequest) -> None:
                         article_sentiment
                     )
 
-                    
-
                     # Add to database
                     session.add(result)
                     result.searched_queries.append(query)
-                    
+
                 else:
                     query_result = does_exist.first()
                     query_result.searched_queries.append(query)
@@ -119,7 +121,7 @@ def main(mytimer: func.TimerRequest) -> None:
 
         query_table = session.query(models.Query)
 
-        #This is ridiculously slow, fix it.
+        # This is ridiculously slow, fix it.
 
         # Find average sentiment for last seven days and update query sentiment.
         for query in query_table:
@@ -130,7 +132,6 @@ def main(mytimer: func.TimerRequest) -> None:
                     total += result.sentiment
                     count += 1.0
 
-        
             if count > 0.0:
                 avg = total / count
 

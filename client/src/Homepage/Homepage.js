@@ -1,19 +1,10 @@
-// import { useHistory } from "react-router-dom";
 import { useState } from "react";
 import SearchForm from "./SearchForm";
-// import SearchList from "./SearchList";
-// import SearchResultList from "./SearchResultList";
-
-// import Sentiment from "./Sentiment";
 
 import styles from "./Homepage.module.css";
 import SearchItem from "./SearchItem";
 
-/**
- *
- * @param {} props
- * @returns A screen with a search item if a search has been made.
- */
+
 const Homepage = (props) => {
   const [queries, setQueries] = useState([]);
   const [newResult, setNewResult] = useState({
@@ -25,7 +16,7 @@ const Homepage = (props) => {
   const [serverRunning, setServerRunning] = useState(true);
 
   /**
-   *
+   * Add query to state.
    * @param {Object} newData - Incoming data on Query object from API.
    */
   const addQuery = (newData) => {
@@ -35,7 +26,7 @@ const Homepage = (props) => {
   };
 
   /**
-   *
+   * Fetch query data from API.
    * @param {string} enteredQueryData - Input data from form.
    */
   async function fetchPostQueryHandler(enteredQueryData) {
@@ -51,13 +42,10 @@ const Homepage = (props) => {
       },
     });
     const data = await response.json();
-    console.log(data);
+
     addQuery(data);
     setNewResult({ result: 0 });
-    console.log(data);
   }
-
-  console.log(queries[0]);
 
   return (
     <div>
@@ -120,45 +108,6 @@ const Homepage = (props) => {
             setServer={setServerRunning}
           />
         )}
-
-        {/* <p>Search Result: Query</p>
-        <div className={styles.positiveSentiment}></div>
-        <ul className={styles.searchlist}>
-          <li className={`${styles.article} ${styles.neutral}`}>
-            <h2>
-              <a
-                href="https://www.bbc.co.uk/news/uk-politics-62150409"
-                className={styles.Neutral}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                headline of the news today is that css is annoying
-              </a>
-            </h2>
-
-            <p>publisher</p>
-            <p>date</p>
-          </li>
-        </ul> */}
-
-        {/* <SearchList
-          queries={queries}
-          newResult={newResult}
-          setNewResult={setNewResult}
-        />
-
-        {newResult.result === 0 && <p>Loading</p>}
-        {newResult.result.length > 1 && <Sentiment newSentiment={newResult} />}
-      </section>
-      <section>
-        {newResult.result.length > 1 && (
-          <SearchResultList SearchResult={newResult} />
-        )} */}
-        {/* <div className={styles.listItem}>
-          <p>Headline: {props.headline}</p>
-          <p>Publisher: {props.publisher}</p>
-          <p>Sentiment: {props.sentiment}</p>
-        </div> */}
       </section>
     </div>
   );

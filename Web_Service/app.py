@@ -1,12 +1,19 @@
-import celery
-from flask import Flask
-import sqlalchemy
 import os
-from models import database
+
+import sqlalchemy
+from flask import Flask
 from flask_cors import CORS
 
+from models import database
 
-def db_uri() -> str:
+
+def db_uri():
+    """
+    Generate database URI
+
+    Returns:
+        str: URI connection string.
+    """
     db_str = "mariadb+mariadbconnector"
     uri = db_str + "://"
     uri += os.environ.get("DB_USER", default="none") + ":"
@@ -27,8 +34,8 @@ def create_app(test_config: dict = {}):
     with app.app_context():
         database.init_app(app)
         database.create_all()
-    # CORS(app)
-    from routes import search_bp, authorise_bp, home_bp, saved_bp
+    CORS(app)
+    from routes import authorise_bp, home_bp, saved_bp, search_bp
     app.register_blueprint(search_bp)
     app.register_blueprint(authorise_bp)
     app.register_blueprint(home_bp)

@@ -1,4 +1,4 @@
-li{
+li {
   width: 100%;
 }
 
@@ -6,17 +6,14 @@ li{
   margin-top: 0;
   padding: 0.5rem;
   width: 100%;
-
 }
 
 @media (min-width: 45em) {
   .article {
     margin: auto;
     margin-top: 0;
-    /* margin-left: 2rem; */
     margin-bottom: 1rem;
     padding: 0.5rem;
-    /* width: 50%; */
     max-width: 50rem;
   }
 }
@@ -54,12 +51,15 @@ p.neutralP {
 
 a {
   display: block;
-  text-decoration: underline;
+  text-decoration: none;
   margin-left: 1.25rem;
   padding: 1rem;
   cursor: pointer;
 }
 
+a:hover{
+  text-decoration: underline;
+}
 
 a.Negative {
   color: rgb(40, 40, 40);

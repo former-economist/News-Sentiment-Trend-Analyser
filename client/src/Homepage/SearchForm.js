@@ -9,15 +9,15 @@ const SearchForm = (props) => {
   const [formTouched, setFormTouched] = useState(false);
 
   /**
-   *
-   * @param {event} e - Set state for search term.
+   * Set state for search term.
+   * @param {event} e 
    */
   const searchTermHandler = (e) => {
     setSearchTerm(e.target.value);
   };
 
   /**
-   *
+   * Set restricted terms.
    * @param {event} e
    * @param {int} index - Index to be added
    */
@@ -35,7 +35,7 @@ const SearchForm = (props) => {
   };
 
   /**
-   *
+   * Removes restricted term input field.
    * @param {int} index - Chosen input index to be changed.
    */
   const removeRestrictedWordHandler = (index) => {
@@ -45,18 +45,17 @@ const SearchForm = (props) => {
   };
 
   /**
-   *
+   * Creates a list of restricted words.
    * @returns A list of restricted word from input.
    */
   const createRestrictedTermList = () => {
     let restList = [...restrictedWord];
     let finalList = [];
     for (let i = 0; i < restList.length; i++) {
-      let blocked = (restList[i].blockedWord).trim()
-      if (blocked.length > 0){
+      let blocked = restList[i].blockedWord.trim();
+      if (blocked.length > 0) {
         finalList.push(blocked);
       }
-      
     }
     return finalList;
   };
@@ -65,24 +64,15 @@ const SearchForm = (props) => {
   const isBlockedSameSearch = blockedSameSearch && formTouched;
 
   /**
-   *
+   * Checks if restricted term is the same as search term.
    * @param {event} e - Submission event
-   * @returns If string is filled with empty space characters
-   *          state validSearchTerm state is set to false. Else
-   *          submit.
+   * @returns Boolean
    */
-
-  // const illegal_terms = ['\a', '\b', '\f', '\n', '\r', '\t', '\v', "\'", '\"',]
-  // for(let i = 0; i < list.length; i++){
-  //   if
-  // }
 
   function isRestrictedSameSearch(arr) {
     const copy = arr.slice();
     for (let i = 0; i < copy.length; i++) {
       copy[i].replace(/-/g, "");
-      console.log(copy[i]);
-      console.log(searchTerm);
       if (searchTerm.includes(copy[i]) || searchTerm.includes(copy[i] + "s")) {
         return false;
       }
@@ -92,15 +82,14 @@ const SearchForm = (props) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    props.setNewIntro(false) // you moved this from below the prevent default
-    props.setServer(true)
+    props.setNewIntro(false); 
+    props.setServer(true);
     setFormTouched(true);
     setInvalidSearchTerm(false);
     setBlockedSameSearch(false);
     const copy = searchTerm.slice();
     const restWords = createRestrictedTermList();
     if (isRestrictedSameSearch(restWords) === false) {
-      console.log("blocked");
       setBlockedSameSearch(true);
       return;
     } else if (copy.trim().length > 1) {
@@ -114,7 +103,6 @@ const SearchForm = (props) => {
       setRestrictedWord([]);
       setFormTouched(false);
     } else {
-      console.log("empty");
       setInvalidSearchTerm(true);
       return;
     }

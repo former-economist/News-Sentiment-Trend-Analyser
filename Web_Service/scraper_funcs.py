@@ -1,5 +1,5 @@
-from textblob import TextBlob
 from gnews import GNews
+from textblob import TextBlob
 
 
 def create_search_string(topic: str, blocked_words: list):
@@ -37,26 +37,6 @@ def create_instance():
     return google_object
 
 
-# def create_dated_instance(start_date: list, end_date: list):
-#     """
-#     A function that creates an instance of GNews that is restricted to searching
-#     input dates.
-
-
-#     Args:
-#         start_date (list): Return articles begining from this date
-#         end_date (list): Return article before this date inclusive
-
-#     Returns:
-#         GNews: A GNews object instance restricted to search articles to the input
-#         search dates. 
-#     """
-#     google_object = GNews()
-#     google_object.start_date = start_date
-#     google_object.end_date = end_date
-#     return google_object
-
-
 def search(topic: str, google_object: GNews):
     """A function that is used to search for article of the topics.
 
@@ -76,34 +56,14 @@ def search(topic: str, google_object: GNews):
     return results
 
 
-# def articles(search_results, google_object):
-#     dic = {}
-#     key = 0
-#     for index, value in enumerate(search_results):
-#         if key <= 2:
-#             article = google_object.get_full_article(value['url'])
-#             dic[index] = article.text
-#             key += 1
-#     return dic
-
-
-def analysis_sentiment(search_results: list):
+def calculate_sentiment(article):
     """
-    A function that finds the sentiment values of each found article
-    and add the sentiment value to the article json.
+    A function that finds the sentiment values of an article
+    and adds the sentiment value to the article json.
 
     Args:
         search_results (_type_): _description_
     """
-    for article in search_results:
-        string = article['title']
-        string += " "
-        string += article['description']
-        blob = TextBlob(string)
-        sentiment = blob.sentiment.polarity
-        article['sentiment'] = sentiment
-
-def calculate_sentiment(article):
     string = article['title']
     string += " "
     string += article['description']

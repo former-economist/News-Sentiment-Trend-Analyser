@@ -1,22 +1,30 @@
-from flask_sqlalchemy import SQLAlchemy
 import datetime
+
+from flask_sqlalchemy import SQLAlchemy
 
 database = SQLAlchemy()
 
 user_query = database.Table('search_table',
-    database.Column('user_id', database.Integer, database.ForeignKey('user.id')),
-    database.Column('query_id', database.Integer, database.ForeignKey('query.id'))
-    )
+                            database.Column(
+                                'user_id', database.Integer, database.ForeignKey('user.id')),
+                            database.Column('query_id', database.Integer,
+                                            database.ForeignKey('query.id'))
+                            )
 
 query_queryresults = database.Table('results_table',
-    database.Column('query_id', database.Integer, database.ForeignKey('query.id')),
-    database.Column('queryresult_id', database.Integer, database.ForeignKey('queryresult.id'))
-    )
+                                    database.Column(
+                                        'query_id', database.Integer, database.ForeignKey('query.id')),
+                                    database.Column('queryresult_id', database.Integer,
+                                                    database.ForeignKey('queryresult.id'))
+                                    )
 
 saved_articles = database.Table('saved_articles_table',
-    database.Column('user_id', database.Integer, database.ForeignKey('user.id')),
-    database.Column('queryresult_id', database.Integer, database.ForeignKey('queryresult.id'))
-    )
+                                database.Column(
+                                    'user_id', database.Integer, database.ForeignKey('user.id')),
+                                database.Column('queryresult_id', database.Integer,
+                                                database.ForeignKey('queryresult.id'))
+                                )
+
 
 class User(database.Model):
     __tablename__ = 'user'
@@ -26,14 +34,15 @@ class User(database.Model):
         database.String(60), unique=True, nullable=False)
     email = database.Column(database.String(120), unique=True, nullable=False)
     password = database.Column(database.String(256), nullable=False)
-    saved_article = database.relationship("QueryResult", secondary=saved_articles, backref="users",  lazy="selectin")
+    saved_article = database.relationship(
+        "QueryResult", secondary=saved_articles, backref="users",  lazy="selectin")
 
-    def __init__(self, pub_id:str, username:str, email:str, password:str):
+    def __init__(self, pub_id: str, username: str, email: str, password: str):
         self.pub_id = pub_id
         self.username = username
         self.email = email
         self.password = password
-    
+
     def __repr__(self):
         return f"pub_id: {self.pub_id}, user: {self.username}"
 
@@ -42,18 +51,19 @@ class User(database.Model):
             "id": self.id,
             "pub_id": self.pub_id,
             "username": self.username,
-            "email" : self.email,
+            "email": self.email,
             "password": self.password
         }
         return dic
-        
+
 
 class Query(database.Model):
     __tablename__ = 'query'
     id = database.Column(database.Integer, primary_key=True)
     topic = database.Column(database.String(255), nullable=False, unique=True)
     seven_d_sentiment = database.Column(database.Float)
-    searchers = database.relationship('User', secondary=user_query, backref='searches')
+    searchers = database.relationship(
+        'User', secondary=user_query, backref='searches')
     query_results = database.relationship(
         "QueryResult", secondary=query_queryresults, backref="searched_querys",  lazy="selectin")
 
@@ -68,6 +78,7 @@ class Query(database.Model):
         }
         return dic
 
+
 class QueryResult(database.Model):
     __tablename__ = 'queryresult'
     id = database.Column(database.Integer, primary_key=True)
@@ -77,7 +88,6 @@ class QueryResult(database.Model):
     url = database.Column(database.Text())
     publish_date = database.Column(database.DateTime())
     sentiment = database.Column(database.Float)
-    
 
     def __init__(self, publisher: str, headline: str, description: str, url: str, publish_date: datetime, sentiment: float):
         self.publisher = publisher

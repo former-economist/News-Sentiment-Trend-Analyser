@@ -1,87 +1,83 @@
-.searchitem{
-    margin: auto;
-    margin-bottom: 0.5rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    width: 100%;
-    color: rgb(40, 40, 40);
-    text-align: center;
-    
+.searchitem {
+  margin: auto;
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  width: 100%;
+  color: rgb(40, 40, 40);
+  text-align: center;
 }
 
 .loadAnimation {
+  margin: auto;
+  margin-top: 4rem;
+  width: 3rem;
+  height: 3rem;
+  border: 5px solid rgb(40, 40, 40, 0.2);
+  border-radius: 50%;
+  border-top-color: rgb(40, 40, 40);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  margin-top: 0;
+  margin-left: 2rem;
+  padding-left: 0.25rem;
+  width: 50%;
+  color: rgb(40, 40, 40);
+}
+
+@media (max-width: 20em) {
+  .searchitem {
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+    width: 100%;
+    color: rgb(40, 40, 40);
+    text-align: center;
+  }
+}
+
+@media (min-width: 45em) {
+  .searchitem {
     margin: auto;
-    margin-top: 4rem;
-    /* margin-left: 5rem; */
+    margin-top: 3rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    width: 100%;
+    text-align: center;
+    color: rgb(40, 40, 40);
+  }
+
+  .loadAnimation {
+    /*
+    Code taken from 'How to create loading animation in HTML & CSS[easy]'
+    URL: https://www.youtube.com/watch?v=wRIHB0sByB0
+    */
+    margin: auto;
+    margin-top: 5rem;
     width: 3rem;
     height: 3rem;
     border: 5px solid rgb(40, 40, 40, 0.2);
     border-radius: 50%;
     border-top-color: rgb(40, 40, 40);
     animation: spin 1s linear infinite;
-
-}
-
-@keyframes spin {
-    100%{
-        transform: rotate(360deg);
-    }
-}
-
-.loading{
-    margin-top: 0;
-    margin-left: 2rem;
-    padding-left: 0.25rem;
-    width: 50%;
-    color: rgb(40, 40, 40);
-    /* background-color: red; */
-}
-
-@media (max-width: 20em){
-    .searchitem{
-        margin-bottom: 0.5rem;
-        padding-left: 0.25rem;
-        width: 100%;
-        color: rgb(40, 40, 40);
-        text-align: center;
-    }
-}
-
-@media (min-width: 45em) {
-    .searchitem{
-        margin: auto;
-        margin-top: 3rem;
-        margin-bottom: 0.5rem;
-        padding-left: 1rem;
-        width: 100%;
-        text-align: center;
-        color: rgb(40, 40, 40);
-        /* border: 2px solid black; */
-    }
-
-    .loadAnimation {
-        margin: auto;
-        margin-top: 5rem;
-        width: 3rem;
-        height: 3rem;
-        border: 5px solid rgb(40, 40, 40, 0.2);
-        border-radius: 50%;
-        border-top-color: rgb(40, 40, 40);
-        animation: spin 1s linear infinite;
-    
-    }
-
-    .loading{
-        margin: auto;
-        margin-top: 5%;
-        justify-self: auto;
-        margin-bottom: 0.5rem;
-        padding-left: 1rem;
-        text-align: center;
-        width: 20%;
-        color: rgb(40, 40, 40);
-        /* background-color: red; */
-        border: 2px solid black;
-    }
-    
   }
+
+  .loading {
+    margin: auto;
+    margin-top: 5%;
+    justify-self: auto;
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    text-align: center;
+    width: 20%;
+    color: rgb(40, 40, 40);
+    border: 2px solid black;
+  }
+}

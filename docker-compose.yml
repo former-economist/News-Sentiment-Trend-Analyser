@@ -57,19 +57,4 @@ services:
     #         - ./client:/client
     #     depends_on:
     #         - webservice
-    # collector:
-    #     container_name: collector
-    #     build: ./Logger
-    #     depends_on:
-    #         - azurite
-    #         - db
-    #     links:
-    #         - db
-    #     restart: "always"
-    #     environment:
-    #         SVC_HOST: 0.0.0.0
-    #         DB_NAME: "${DB_NAME}"
-    #         DB_USER: "${DB_USER}"
-    #         DB_PASSWORD: "${DB_PASSWORD}"
-    #         DB_SERVER: db
-    #         Azure__StorageConnectionString: "${WEB_STORAGE}"
+    
